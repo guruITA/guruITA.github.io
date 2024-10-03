@@ -1,13 +1,13 @@
 html, body {
-  height: 100%;
-  margin: 0;
+  height: 100%; /* Ensure html and body take full height */
+  margin: 0; /* Remove default margin */
 }
 
 body {
-  background: linear-gradient(to bottom, black, #007BFF);
-  margin: 0; 
+  background: linear-gradient(to bottom, black, white);
+  display: flex; /* Use flexbox for layout */
+  flex-direction: column; /* Stack children vertically */
 }
-
 
 .navbar {
   display: flex;
@@ -27,7 +27,7 @@ body {
 }
 
 .nav-link.active {
-  text-decoration: none;
+  text-decoration: none; 
 }
 
 .nav-link.active::after {
@@ -59,9 +59,37 @@ body {
   border-radius: 20px;
 }
 
-h1 {
-  color: red; 
-  margin: 20px; 
-  display: flex;
-  justify-content: center;
+.instagram-icon {
+  color: white;
+  background-color: #C13584;
+  padding: 5px;
+  border-radius: 13px;
+}
+.linkedin-icon {
+  color: rgb(13, 77, 167);
+  background-color: white;
+  margin: 5px;
+}
+
+.github-icon {
+  color: white;
+  background-color: black;
+  border-radius: 20px;
+  border: 1px solid black;
+  margin: 5px;
+}
+
+/* Footer styles */
+footer {
+  margin-top: auto;
+  color: white;
+}
+
+.copyright {
+  text-align: center;
+  background-color: black;
+}
+
+.follow-me {
+  background: linear-gradient(to top, black, lightgray);
 }
