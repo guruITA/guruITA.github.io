@@ -1,5 +1,7 @@
 ---
-layout: null
+layout: notes
+title: Notes
+subtitle: My first note
 ---
 
 # My first note

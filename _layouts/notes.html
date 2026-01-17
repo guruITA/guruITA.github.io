@@ -4,11 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page.title }}</title>
+
     <link rel="stylesheet" href="/src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/notes.css" />
   </head>
+
   <body>
-    <main class="container">
-      {{ content }}
+    <main class="notes-wrap">
+      <header class="notes-header">
+        <h1 class="notes-title">{{ page.title }}</h1>
+        {% if page.subtitle %}
+          <p class="notes-subtitle">{{ page.subtitle }}</p>
+        {% endif %}
+      </header>
+
+      <article class="notes-content">
+        {{ content }}
+      </article>
+
+      <footer class="notes-footer">
+        <a class="notes-back" href="/">← Back to portfolio</a>
+      </footer>
     </main>
   </body>
 </html>
