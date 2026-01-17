@@ -1,2 +1,6 @@
-# My first note 
-- test 
+---
+layout: null
+---
+
+# My first note
+- test
