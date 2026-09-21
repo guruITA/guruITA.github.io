@@ -80,3 +80,42 @@
     height: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .home {
+    min-height: auto;
+    padding: 3rem 1.5rem;
+
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .content {
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .description {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  .actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .image {
+    justify-content: center;
+
+    img {
+      max-width: 350px;
+    }
+  }
+}
