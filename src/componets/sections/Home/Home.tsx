@@ -1,10 +1,30 @@
 import styles from './Home.module.scss';
+import homeImage from '../../../assets/Home.png';
 
 function Home() {
     return (
-        <section className={styles.home}>
-            <h1>Gurpreet Singh</h1>
-            <p>Software Engineering Student & Full-Stack Developer</p>
+        <section className={styles.home} id="home">
+            <div className={styles.content}>
+                <p className={styles.introduction}>Hi, I'm</p>
+
+                <h1>Gurpreet Singh</h1>
+
+                <h2>Software Engineering Student & Full-Stack Developer</h2>
+
+                <p className={styles.description}>
+                    I enjoy building software, learning new technologies
+                    and improving my development skills every day.
+                </p>
+
+                <div className={styles.actions}>
+                    <a href="#projects">View Projects</a>
+                    <a href="#contact">Contact Me</a>
+                </div>
+            </div>
+
+            <div className={styles.image}>
+                <img src={homeImage} alt="Gurpreet Singh developer illustration" />
+            </div>
         </section>
     );
 }

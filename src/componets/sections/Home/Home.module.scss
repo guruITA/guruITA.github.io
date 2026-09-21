@@ -1,3 +1,33 @@
 .home {
   width: 100%;
+  max-width: 1200px;
+  min-height: calc(100vh - 80px);
+  margin: 0 auto;
+  padding: 4rem 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4rem;
+}
+
+.content {
+  flex: 1;
+}
+
+.image {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+
+  img {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
 }
