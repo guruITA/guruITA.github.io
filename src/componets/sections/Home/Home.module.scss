@@ -13,6 +13,60 @@
 
 .content {
   flex: 1;
+
+  .introduction {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 3rem;
+    line-height: 1.1;
+  }
+
+  h2 {
+    margin: 1rem 0;
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+
+  .description {
+    max-width: 550px;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+
+  a {
+    padding: 0.75rem 1.25rem;
+    border: 2px solid #6c3cff;
+    border-radius: 8px;
+
+    color: #6c3cff;
+    text-decoration: none;
+    font-weight: 600;
+
+    transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+
+    &:first-child {
+      background-color: #6c3cff;
+      color: white;
+    }
+
+    &:hover {
+      background-color: #5630cc;
+      border-color: #5630cc;
+      color: white;
+    }
+  }
 }
 
 .image {
@@ -25,9 +79,4 @@
     max-width: 450px;
     height: auto;
   }
-}
-
-.actions {
-  display: flex;
-  gap: 1rem;
 }
