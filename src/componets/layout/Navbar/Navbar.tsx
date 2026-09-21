@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './Navbar.module.scss';
+import profileImage from '../../../assets/profile.webp';
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -8,10 +9,12 @@ function Navbar() {
         <header className={styles.header}>
             <nav className={styles.navbar}>
                 <a className={styles.logo} href="#home">
-                    Gurpreet Singh
+                    <img src={profileImage} alt="" />
+                    <span>guruITA</span>
                 </a>
 
                 <button
+                    type="button"
                     className={styles.menuButton}
                     onClick={() => setMenuOpen(!menuOpen)}
                     aria-label="Toggle navigation menu"
