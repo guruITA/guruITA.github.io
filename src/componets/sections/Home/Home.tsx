@@ -1,5 +1,5 @@
 import styles from './Home.module.scss';
-import homeImage from '../../../assets/Home.png';
+import profileImage from '../../../assets/profile.webp';
 
 function Home() {
     return (
@@ -23,7 +23,7 @@ function Home() {
             </div>
 
             <div className={styles.image}>
-                <img src={homeImage} alt="Gurpreet Singh developer illustration" />
+                <img src={profileImage} alt="Gurpreet Singh developer illustration" />
             </div>
         </section>
     );

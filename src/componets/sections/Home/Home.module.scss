@@ -70,14 +70,12 @@
 }
 
 .image {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-
   img {
-    width: 100%;
-    max-width: 450px;
-    height: auto;
+    width: 380px;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
   }
 }
 
