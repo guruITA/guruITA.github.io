@@ -1,5 +1,6 @@
 import './App.scss';
 import Navbar from './componets/layout/Navbar/Navbar';
+import Home from './componets/sections/Home/Home';
 
 function App() {
     return (
@@ -7,8 +8,7 @@ function App() {
             <Navbar />
 
             <main>
-                <h1>Gurpreet Singh</h1>
-                <p>Software Engineering Student & Full-Stack Developer</p>
+                <Home />
             </main>
         </>
     );
