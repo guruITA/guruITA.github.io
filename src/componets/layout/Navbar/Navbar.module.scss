@@ -12,12 +12,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 
     .logo {
         color: black;
         text-decoration: none;
         font-size: 1.1rem;
         font-weight: 700;
+    }
+
+    .menuButton {
+        display: none;
+        background: none;
+        border: none;
+        padding: 0;
+
+        font-size: 1.75rem;
+        cursor: pointer;
     }
 
     .navLinks {
@@ -38,22 +49,11 @@
                 color: #6c3cff;
             }
         }
-
-        .menuButton {
-            display: none;
-            background: none;
-            border: none;
-            padding: 0;
-
-            font-size: 1.75rem;
-            cursor: pointer;
-        }
     }
 }
 
 @media (max-width: 768px) {
     .navbar {
-        position: relative;
         padding: 1.25rem 1.5rem;
 
         .logo {
@@ -82,10 +82,6 @@
 
             &.open {
                 display: flex;
-            }
-
-            a {
-                font-size: 1rem;
             }
         }
     }
