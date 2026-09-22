@@ -4,13 +4,6 @@ import styles from './ThreeBackground.module.scss';
 
 function ThreeBackground() {
 
-    // const material = new THREE.MeshBasicMaterial({
-    //     color: 0x58A6FF,
-    //     wireframe: true,
-    //     transparent: true,
-    //     opacity: 0.18,
-    // });
-
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
