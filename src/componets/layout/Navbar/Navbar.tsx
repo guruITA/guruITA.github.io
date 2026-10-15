@@ -35,14 +35,14 @@ function Navbar() {
                     </li>
 
                     <li>
-                        <a href="#skills" onClick={() => setMenuOpen(false)}>
-                            Skills
+                        <a href="#projects" onClick={() => setMenuOpen(false)}>
+                            Projects
                         </a>
                     </li>
 
                     <li>
-                        <a href="#projects" onClick={() => setMenuOpen(false)}>
-                            Projects
+                        <a href="#skills" onClick={() => setMenuOpen(false)}>
+                            Skills
                         </a>
                     </li>
 
