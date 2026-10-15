@@ -5,13 +5,22 @@
   // Blue colors
   --color-blue: #539bef;
   --color-blue-hover: #3f83cc;
+  --color-blue-bright: #78b6ff;
+
+  // Accent colors
+  --color-cyan: #22d3ee;
+  --color-mint: #2dd4bf;
+  --color-purple: #a78bfa;
+  --color-violet: #8b5cf6;
 
   // Text colors
   --color-white: #ffffff;
   --color-off-white: #f4f7fb;
   --color-light-gray: #cbd5e1;
+  --color-muted: #7c8aa5;
 
   // Effects
-  --color-blue-border: rgba(83, 155, 239, 0.4);
+  --color-blue-border: rgba(83, 155, 239, 0.3);
   --color-blue-glow: rgba(83, 155, 239, 0.12);
+  --color-glass-border: #22314b;
 }
