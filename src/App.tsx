@@ -2,12 +2,12 @@ import './App.scss';
 
 import Navbar from './componets/layout/Navbar/Navbar';
 import Home from './componets/sections/Home/Home';
-import WorldBackground from './componets/background/WorldBackground/WorldBackground';
+import ShaderBackground from './componets/background/ShaderBackground/ShaderBackground';
 
 function App() {
     return (
         <>
-            <WorldBackground />
+            <ShaderBackground />
             <Navbar />
 
             <main>
