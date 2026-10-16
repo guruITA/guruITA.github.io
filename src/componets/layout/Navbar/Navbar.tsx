@@ -20,7 +20,14 @@ function Navbar() {
                     aria-label="Toggle navigation menu"
                     aria-expanded={menuOpen}
                 >
-                    {menuOpen ? '✕' : '☰'}
+                    {/* SVG instead of the ☰ / ✕ characters, which every system draws with a different symbol font */}
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        {menuOpen ? (
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        ) : (
+                            <path d="M4 7h16M4 12h16M4 17h16" />
+                        )}
+                    </svg>
                 </button>
 
                 <ul

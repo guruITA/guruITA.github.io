@@ -37,6 +37,8 @@
   min-height: 760px;
   padding-top: 6.5rem;
   padding-bottom: 4rem;
+  // the profile orbit reaches past the viewport; without this, phones zoom the page out to fit it
+  overflow-x: clip;
 
   &::before {
     background:

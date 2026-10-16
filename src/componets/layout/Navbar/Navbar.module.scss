@@ -60,6 +60,16 @@
         color: var(--color-off-white);
         font-size: 1.75rem;
         cursor: pointer;
+
+        svg {
+            display: block;
+            width: 1.75rem;
+            height: 1.75rem;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
     }
 
     .navLinks {
