@@ -32,4 +32,8 @@ The design source of truth is the [guruITA Portfolio Website Design](https://www
 
 ## Contact form
 
-The contact form posts to an external form endpoint configured via `VITE_CONTACT_FORM_ENDPOINT` — see `.env.example`.
+The contact form posts to an external form endpoint configured via `VITE_CONTACT_FORM_ENDPOINT` — see `.env.example`. For the live site, set it as a repository variable (Settings → Secrets and variables → Actions → Variables).
+
+## Deployment
+
+Every push to `main` runs `.github/workflows/deploy.yml`: it lints, builds with Vite and publishes `dist/` to GitHub Pages.
