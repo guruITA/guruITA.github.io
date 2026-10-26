@@ -29,6 +29,9 @@ jobs:
 
       - run: npm ci
 
+      # the build prints the /cv/ page to a PDF with Playwright's headless Chromium
+      - run: npx playwright install --with-deps chromium-headless-shell
+
       - run: npm run lint
 
       - run: npm run build

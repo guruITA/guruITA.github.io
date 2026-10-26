@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:cv-pdf",
+    "build:cv-pdf": "node scripts/build-cv-pdf.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.8.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.186.1"
@@ -25,6 +27,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.12.0",
+    "playwright": "^1.64.1",
     "sass": "^1.105.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.1",

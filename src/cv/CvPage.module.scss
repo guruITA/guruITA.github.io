@@ -1,0 +1,339 @@
+@use '../styles/buttons';
+
+// On screen the CV is a glass sheet in the site's style; printed (and so in the PDF) it is a plain A4 page.
+// The sheet is 1000px wide so the photo, the name and the contact rows fit on one line on desktop.
+
+.page {
+  padding: 1.5rem 1.5rem 4rem;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(83, 155, 239, 0.16), transparent 45%),
+    radial-gradient(circle at 90% 30%, rgba(139, 92, 246, 0.12), transparent 40%),
+    var(--color-dark-navy);
+}
+
+.toolbar {
+  width: min(100%, 1000px);
+  margin: 0 auto 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// the same button as 'View projects' on the portfolio
+.download {
+  @include buttons.primary-action;
+}
+
+.sheet {
+  width: min(100%, 1000px);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(13, 30, 57, 0.82), rgba(4, 12, 27, 0.72));
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.3);
+}
+
+.header {
+  // the contact rows sit next to the name when they fit (print) and wrap below it otherwise
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-glass-border);
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    letter-spacing: -0.02em;
+  }
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.photo {
+  flex-shrink: 0;
+  width: clamp(4.5rem, 12vw, 6.5rem);
+  height: auto;
+  aspect-ratio: 1;
+  border: 2px solid rgba(96, 165, 250, 0.7);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.role {
+  margin: 0.5rem 0 0;
+  color: var(--color-blue-bright);
+  font-weight: 700;
+}
+
+.location {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+// "Label  value" rows; the labels share one column so the values line up
+.links,
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.85rem;
+  font-size: 0.88rem;
+
+  div {
+    display: contents;
+  }
+
+  dt {
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  a {
+    color: var(--color-light-gray);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--color-cyan);
+    }
+  }
+}
+
+.facts dd {
+  color: var(--color-light-gray);
+}
+
+.summary {
+  margin: 1.5rem 0 0;
+  color: var(--color-light-gray);
+  line-height: 1.7;
+}
+
+.columns {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 2.5rem;
+}
+
+.section {
+  & + & {
+    margin-top: 2rem;
+  }
+
+  h2 {
+    margin: 0 0 1rem;
+    color: var(--color-mint);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+}
+
+.entries {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.4rem;
+  list-style: none;
+}
+
+.entry {
+  // an entry is never split over two PDF pages
+  break-inside: avoid;
+
+  ul {
+    margin: 0.55rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--color-light-gray);
+    line-height: 1.6;
+    font-size: 0.92rem;
+  }
+}
+
+.entryHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.period {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.place {
+  margin: 0.25rem 0 0;
+  color: var(--color-blue-bright);
+  font-size: 0.92rem;
+}
+
+.skillGroup {
+  break-inside: avoid;
+
+  & + & {
+    margin-top: 1rem;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+.tags {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+
+  li {
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.14);
+    color: #bfdbfe;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 1rem 1rem 3rem;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+}
+
+@media print {
+  // the site's dark body would print as well (the PDF keeps backgrounds for the tags);
+  // a smaller root size scales every rem down, so the CV fits on one A4 page
+  :global(html),
+  :global(body) {
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  :global(html) {
+    font-size: 11.75px;
+  }
+
+  .summary,
+  .entry ul {
+    line-height: 1.4;
+  }
+
+  .entry ul {
+    margin-top: 0.35rem;
+  }
+
+  .summary {
+    margin-top: 1rem;
+  }
+
+  .columns {
+    margin-top: 1.4rem;
+  }
+
+  .entries {
+    gap: 0.8rem;
+  }
+
+  .section + .section {
+    margin-top: 1.4rem;
+  }
+
+  .header h1 {
+    font-size: 2.4rem;
+  }
+
+  .page {
+    padding: 0;
+    background: none;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .sheet {
+    width: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    color: #0f172a;
+  }
+
+  .header {
+    border-color: #cbd5e1;
+  }
+
+  .photo {
+    width: 5.5rem;
+    border-color: #93c5fd;
+  }
+
+  .role,
+  .place {
+    color: #1d4ed8;
+  }
+
+  .location,
+  .period,
+  .links dt,
+  .facts dt {
+    color: #475569;
+  }
+
+  .links a,
+  .facts dd,
+  .summary,
+  .entry ul {
+    color: #334155;
+  }
+
+  .section h2 {
+    color: #0f766e;
+  }
+
+  .tags li {
+    background: #e0ecff;
+    color: #1e3a8a;
+  }
+
+  // two columns also on paper (A4 is narrower than the mobile breakpoint), like a classic CV
+  .columns {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  }
+}

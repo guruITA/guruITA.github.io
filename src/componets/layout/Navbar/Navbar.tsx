@@ -2,13 +2,15 @@ import { useState } from 'react';
 import styles from './Navbar.module.scss';
 import profileImage from '../../../assets/profile.webp';
 
+// Links start with / so they also lead to the portfolio sections from the CV page
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const onCvPage = window.location.pathname.startsWith('/cv');
 
     return (
         <header className={styles.header}>
             <nav className={styles.navbar}>
-                <a className={styles.logo} href="#home">
+                <a className={styles.logo} href="/#home">
                     <img src={profileImage} alt="" />
                     <span>guruITA</span>
                 </a>
@@ -36,25 +38,41 @@ function Navbar() {
                     }`}
                 >
                     <li>
-                        <a href="#about" onClick={() => setMenuOpen(false)}>
+                        <a href="/#home" onClick={() => setMenuOpen(false)}>
+                            Home
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/#about" onClick={() => setMenuOpen(false)}>
                             About
                         </a>
                     </li>
 
                     <li>
-                        <a href="#projects" onClick={() => setMenuOpen(false)}>
+                        <a href="/#projects" onClick={() => setMenuOpen(false)}>
                             Projects
                         </a>
                     </li>
 
                     <li>
-                        <a href="#skills" onClick={() => setMenuOpen(false)}>
+                        <a href="/#skills" onClick={() => setMenuOpen(false)}>
                             Skills
                         </a>
                     </li>
 
                     <li>
-                        <a href="#contact" onClick={() => setMenuOpen(false)}>
+                        <a
+                            href="/cv/"
+                            aria-current={onCvPage ? 'page' : undefined}
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            CV
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/#contact" onClick={() => setMenuOpen(false)}>
                             Contact
                         </a>
                     </li>
