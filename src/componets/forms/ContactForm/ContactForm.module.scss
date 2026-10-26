@@ -125,6 +125,7 @@
   background: rgba(3, 10, 24, 0.5);
   color: var(--color-blue-bright);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
   &:hover,
   &:focus-visible {
