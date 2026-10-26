@@ -1,7 +1,14 @@
-import { useEffect } from 'react';
+import { lazy, useEffect, useState, type PointerEvent } from 'react';
 import profileImage from '../../../assets/profile.webp';
 import ContactForm from '../../forms/ContactForm/ContactForm';
+import SceneSlot from '../../three/SceneSlot';
 import styles from './Home.module.scss';
+
+// three.js and the scenes load only when the first scene nears the screen
+const HeroOrbScene = lazy(() => import('../../three/HeroOrbScene'));
+const AboutRingsScene = lazy(() => import('../../three/AboutRingsScene'));
+const ProjectPreviewScene = lazy(() => import('../../three/ProjectPreviewScene'));
+const SkillIconScene = lazy(() => import('../../three/SkillIconScene'));
 
 const valueProps = [
     {
@@ -83,6 +90,65 @@ function SectionHeading({
     );
 }
 
+// Touch also fires pointerenter (even when a scroll starts on a card), so only the mouse counts as hover
+function onMouse(handler: () => void) {
+    return (event: PointerEvent) => {
+        if (event.pointerType === 'mouse') {
+            handler();
+        }
+    };
+}
+
+function ProjectCard({ project, index }: { project: (typeof projects)[number]; index: number }) {
+    const [active, setActive] = useState(false);
+
+    return (
+        <article
+            className={styles.projectCard}
+            onPointerEnter={onMouse(() => setActive(true))}
+            onPointerLeave={onMouse(() => setActive(false))}
+            onFocus={() => setActive(true)}
+            onBlur={() => setActive(false)}
+        >
+            <div className={styles.projectTopline}>
+                <span>{project.number}</span>
+                <i aria-hidden="true" />
+            </div>
+            <h3>{project.title}</h3>
+            <p>{project.description}</p>
+            <ul aria-label={`${project.title} technologies`}>
+                {project.tags.map((tag) => (
+                    <li key={tag}>{tag}</li>
+                ))}
+            </ul>
+            <SceneSlot className={styles.projectScene}>
+                {(inView) => <ProjectPreviewScene inView={inView} variant={index} active={active} />}
+            </SceneSlot>
+            <a href="#contact">
+                View case study <span aria-hidden="true">→</span>
+            </a>
+        </article>
+    );
+}
+
+function SkillCard({ skill, index }: { skill: (typeof skills)[number]; index: number }) {
+    const [active, setActive] = useState(false);
+
+    return (
+        <article
+            className={styles.skillCard}
+            onPointerEnter={onMouse(() => setActive(true))}
+            onPointerLeave={onMouse(() => setActive(false))}
+        >
+            <SceneSlot className={styles.skillIcon} fallback={<span>{skill.index}</span>}>
+                {(inView) => <SkillIconScene inView={inView} variant={index} active={active} />}
+            </SceneSlot>
+            <h3>{skill.title}</h3>
+            <p>{skill.description}</p>
+        </article>
+    );
+}
+
 function Home() {
     useEffect(() => {
         const sections = document.querySelectorAll<HTMLElement>('[data-scene]');
@@ -122,6 +188,9 @@ function Home() {
                 <div className={`${styles.container} ${styles.heroGrid}`}>
                     <div className={styles.profileVisual}>
                         <div className={styles.profileOrbit} aria-hidden="true" />
+                        <SceneSlot className={styles.heroScene}>
+                            {(inView) => <HeroOrbScene inView={inView} />}
+                        </SceneSlot>
                         <img
                             src={profileImage}
                             alt="Illustrated portrait of Gurpreet Singh"
@@ -185,6 +254,9 @@ function Home() {
                     />
 
                     <div className={styles.glassPanel}>
+                        <SceneSlot className={styles.aboutScene}>
+                            {(inView) => <AboutRingsScene inView={inView} />}
+                        </SceneSlot>
                         <p className={styles.panelIndex}>What I bring</p>
                         <ul className={styles.principles}>
                             <li>
@@ -224,23 +296,8 @@ function Home() {
                     />
 
                     <div className={styles.projectGrid}>
-                        {projects.map((project) => (
-                            <article className={styles.projectCard} key={project.title}>
-                                <div className={styles.projectTopline}>
-                                    <span>{project.number}</span>
-                                    <i aria-hidden="true" />
-                                </div>
-                                <h3>{project.title}</h3>
-                                <p>{project.description}</p>
-                                <ul aria-label={`${project.title} technologies`}>
-                                    {project.tags.map((tag) => (
-                                        <li key={tag}>{tag}</li>
-                                    ))}
-                                </ul>
-                                <a href="#contact">
-                                    View case study <span aria-hidden="true">→</span>
-                                </a>
-                            </article>
+                        {projects.map((project, index) => (
+                            <ProjectCard project={project} index={index} key={project.title} />
                         ))}
                     </div>
                 </div>
@@ -259,12 +316,8 @@ function Home() {
                     />
 
                     <div className={styles.skillGrid}>
-                        {skills.map((skill) => (
-                            <article className={styles.skillCard} key={skill.title}>
-                                <span>{skill.index}</span>
-                                <h3>{skill.title}</h3>
-                                <p>{skill.description}</p>
-                            </article>
+                        {skills.map((skill, index) => (
+                            <SkillCard skill={skill} index={index} key={skill.title} />
                         ))}
                     </div>
                 </div>

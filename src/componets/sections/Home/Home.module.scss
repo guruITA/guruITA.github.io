@@ -220,6 +220,14 @@
     transform: rotateX(68deg) rotateZ(12deg);
   }
 
+  // the 3D orb sits behind the photo and reaches a little past the card
+  .heroScene {
+    position: absolute;
+    inset: -12%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
   img {
     position: relative;
     z-index: 2;
@@ -361,8 +369,19 @@
 }
 
 .glassPanel {
+  position: relative;
   padding: clamp(1.5rem, 4vw, 2.5rem);
   border-radius: 1.5rem;
+}
+
+// gyroscope floating out of the panel's top right corner
+.aboutScene {
+  position: absolute;
+  top: -3rem;
+  right: -1rem;
+  width: 9rem;
+  height: 9rem;
+  pointer-events: none;
 }
 
 .glassPanel .secondaryAction {
@@ -489,6 +508,13 @@
   }
 }
 
+// 3D preview in the open middle of the card, between the tags and the case study link
+.projectScene {
+  height: 10rem;
+  margin: 0 -0.75rem 1.25rem;
+  pointer-events: none;
+}
+
 .skills {
   &::before {
     background: linear-gradient(90deg, rgba(2, 7, 19, 0.84), rgba(2, 12, 22, 0.4) 55%, rgba(2, 7, 19, 0.7));
@@ -513,6 +539,16 @@
   &:hover {
     transform: translateY(-0.45rem) rotateX(2deg);
     border-color: rgba(34, 211, 238, 0.55);
+  }
+
+  // 3D icon; the letter in > span is its fallback without WebGL
+  .skillIcon {
+    width: 4rem;
+    height: 4rem;
+    border: 1px solid rgba(34, 211, 238, 0.36);
+    border-radius: 0.9rem;
+    background: rgba(6, 182, 212, 0.08);
+    pointer-events: none;
   }
 
   > span {
@@ -763,6 +799,17 @@
   .skillGrid {
     margin-top: 3rem;
     grid-template-columns: 1fr;
+  }
+
+  .aboutScene {
+    top: -2.5rem;
+    right: 0;
+    width: 7rem;
+    height: 7rem;
+  }
+
+  .projectScene {
+    height: 8.5rem;
   }
 
   .projectCard,
