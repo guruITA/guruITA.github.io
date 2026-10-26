@@ -1,3 +1,5 @@
+@use '../../../styles/buttons';
+
 .portfolio {
   position: relative;
   color: var(--color-off-white);
@@ -130,53 +132,12 @@
   gap: 0.85rem;
 }
 
-.primaryAction,
-.secondaryAction {
-  min-height: 3.25rem;
-  padding: 0.85rem 1.3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  border: 1px solid transparent;
-  border-radius: 0.75rem;
-  text-decoration: none;
-  font-weight: 700;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease,
-    box-shadow 180ms ease;
-
-  &:hover,
-  &:focus-visible {
-    transform: translateY(-3px);
-  }
-}
-
 .primaryAction {
-  background: linear-gradient(135deg, var(--color-blue), #2563eb);
-  color: var(--color-dark-navy);
-  box-shadow: 0 1rem 3rem rgba(37, 99, 235, 0.22);
-
-  &:hover,
-  &:focus-visible {
-    box-shadow: 0 1.25rem 3.25rem rgba(37, 99, 235, 0.35);
-  }
+  @include buttons.primary-action;
 }
 
 .secondaryAction {
-  border-color: rgba(96, 165, 250, 0.55);
-  background: rgba(3, 10, 24, 0.5);
-  color: var(--color-blue-bright);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  &:hover,
-  &:focus-visible {
-    border-color: var(--color-cyan);
-    background: rgba(12, 28, 55, 0.72);
-  }
+  @include buttons.secondary-action;
 }
 
 .profileVisual {
@@ -612,65 +573,6 @@
   }
 }
 
-.footer {
-  position: relative;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(2, 7, 19, 0.85);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  .container {
-    min-height: 7rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  strong {
-    color: var(--color-off-white);
-    font-size: 0.85rem;
-  }
-
-  span {
-    color: var(--color-muted);
-    font-size: 0.8rem;
-  }
-}
-
-.socialLinks {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 0.75rem;
-  list-style: none;
-
-  a {
-    width: 2.25rem;
-    height: 2.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    border: 1px solid rgba(203, 213, 225, 0.15);
-    background: rgba(17, 27, 48, 0.6);
-    color: var(--color-light-gray);
-    transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--color-cyan);
-      border-color: rgba(34, 211, 238, 0.4);
-      transform: translateY(-2px);
-    }
-  }
-
-  svg {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-}
-
 @keyframes orbit {
   to {
     transform: rotate(360deg);
@@ -825,12 +727,6 @@
     border-radius: 1.5rem;
   }
 
-  .footer .container {
-    padding: 1.5rem 0;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

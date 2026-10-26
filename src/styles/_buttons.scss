@@ -1,0 +1,55 @@
+// Button looks shared by every page, so a button looks the same on the portfolio and the CV page
+
+@mixin action-base {
+  min-height: 3.25rem;
+  padding: 0.85rem 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+@mixin primary-action {
+  @include action-base;
+  background: linear-gradient(135deg, var(--color-blue), #2563eb);
+  color: var(--color-dark-navy);
+  box-shadow: 0 1rem 3rem rgba(37, 99, 235, 0.22);
+
+  &:hover,
+  &:focus-visible {
+    box-shadow: 0 1.25rem 3.25rem rgba(37, 99, 235, 0.35);
+  }
+}
+
+@mixin secondary-action {
+  @include action-base;
+  border-color: rgba(96, 165, 250, 0.55);
+  background: rgba(3, 10, 24, 0.5);
+  color: var(--color-blue-bright);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--color-cyan);
+    background: rgba(12, 28, 55, 0.72);
+  }
+}

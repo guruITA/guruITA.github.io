@@ -106,7 +106,9 @@
                 transition: transform 0.2s ease;
             }
 
-            &:hover {
+            // the link of the page you are on (CV) looks like a hovered link
+            &:hover,
+            &[aria-current='page'] {
                 color: var(--color-blue);
 
                 &::after {
@@ -157,5 +159,12 @@
                 }
             }
         }
+    }
+}
+
+// not part of a printed page (the CV PDF is printed from the CV page)
+@media print {
+    .header {
+        display: none;
     }
 }
