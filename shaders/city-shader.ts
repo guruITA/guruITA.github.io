@@ -77,7 +77,9 @@ fn scene(p: vec3f) -> vec2f {
       }
     }
   }
-  let spire = sdBox(p - vec3f(0.0, 5.5, 0.0), vec3f(0.32, 5.5, 0.32));
+  // the spire ends just under the orb (bottom at y 6.84 at its smallest), so the orb sits on top of it
+  // instead of the spire running through it; the Figma original goes up to y 11
+  let spire = sdBox(p - vec3f(0.0, 3.4, 0.0), vec3f(0.32, 3.4, 0.32));
   if (spire < res.x) {
     res = vec2f(spire, 2.0);
   }
