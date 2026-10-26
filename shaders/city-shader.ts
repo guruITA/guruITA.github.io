@@ -65,6 +65,50 @@ fn towerDist(p: vec3f, id: vec2f) -> f32 {
   return sdBox(vec3f(local.x, p.y - h, local.y), vec3f(w, h, w));
 }
 
+// Circuit-board traces on the ground: edges of a square lattice light up at random as traces;
+// pads sit where a trace ends or several meet, and small pulses run along the traces.
+fn edgeX(i: vec2f) -> bool {
+  return hash2(i + vec2f(17.3, 5.1)) > 0.52;
+}
+
+fn edgeZ(i: vec2f) -> bool {
+  return hash2(i + vec2f(2.7, 31.9)) > 0.58;
+}
+
+// returns (trace, pad, pulse) for lattice coordinates q; w is the edge softness
+fn circuit(q: vec2f, w: f32, t: f32) -> vec3f {
+  let v = floor(q + vec2f(0.5));
+  let f = q - v;
+  var trace = 0.0;
+  var pulse = 0.0;
+  // the edge along x on this side of the lattice point
+  let ex = vec2f(select(v.x - 1.0, v.x, f.x >= 0.0), v.y);
+  if (edgeX(ex)) {
+    let line = 1.0 - smoothstep(0.03, 0.03 + w, abs(f.y));
+    trace = max(trace, line);
+    pulse = max(pulse, line * pow(0.5 + 0.5 * sin(q.x * 2.2 - t * 2.6 + hash2(ex) * 6.28), 14.0));
+  }
+  let ez = vec2f(v.x, select(v.y - 1.0, v.y, f.y >= 0.0));
+  if (edgeZ(ez)) {
+    let line = 1.0 - smoothstep(0.03, 0.03 + w, abs(f.x));
+    trace = max(trace, line);
+    pulse = max(pulse, line * pow(0.5 + 0.5 * sin(q.y * 2.2 - t * 2.6 + hash2(ez) * 6.28), 14.0));
+  }
+  var links = 0;
+  if (edgeX(v)) { links += 1; }
+  if (edgeX(v - vec2f(1.0, 0.0))) { links += 1; }
+  if (edgeZ(v)) { links += 1; }
+  if (edgeZ(v - vec2f(0.0, 1.0))) { links += 1; }
+  var pad = 0.0;
+  if (links == 1 || (links >= 3 && hash2(v + vec2f(8.8, 3.3)) > 0.4)) {
+    let r = length(f);
+    let padDot = 1.0 - smoothstep(0.07, 0.07 + w, r);
+    let ring = 1.0 - smoothstep(0.014, 0.014 + w, abs(r - 0.15));
+    pad = max(padDot, ring * 0.8);
+  }
+  return vec3f(trace, pad, pulse);
+}
+
 fn scene(p: vec3f) -> vec2f {
   let t = u.a.z;
   var res = vec2f(p.y, 0.0);
@@ -78,7 +122,6 @@ fn scene(p: vec3f) -> vec2f {
     }
   }
   // the spire ends just under the orb (bottom at y 6.84 at its smallest), so the orb sits on top of it
-  // instead of the spire running through it; the Figma original goes up to y 11
   let spire = sdBox(p - vec3f(0.0, 3.4, 0.0), vec3f(0.32, 3.4, 0.32));
   if (spire < res.x) {
     res = vec2f(spire, 2.0);
@@ -150,9 +193,11 @@ fn calcNormal(p: vec3f) -> vec3f {
     }
   }
 
-  let skyTop = vec3f(0.004, 0.006, 0.016);
-  let skyHor = vec3f(0.012, 0.022, 0.05) + tint * 0.02;
-  var col = mix(skyHor, skyTop, clamp(rd.y * 2.0, 0.0, 1.0));
+  // a light horizon, so the skyline stands out against it
+  let skyTop = vec3f(0.006, 0.01, 0.026);
+  let skyHor = vec3f(0.06, 0.1, 0.19) + tint * 0.07;
+  var col = mix(skyHor, skyTop, pow(clamp(rd.y * 2.2, 0.0, 1.0), 0.6));
+  col = col + (tint * 0.6 + vec3f(0.25, 0.35, 0.5)) * 0.1 * exp(-abs(rd.y) * 14.0);
   let starCell = floor(vec2f(atan2(rd.z, rd.x), rd.y) * 220.0);
   col = col + vec3f(step(0.997, hash2(starCell)) * 0.7 * clamp(rd.y * 4.0, 0.0, 1.0));
 
@@ -161,12 +206,25 @@ fn calcNormal(p: vec3f) -> vec3f {
     let ld = normalize(vec3f(0.4, 0.8, 0.3));
     let dif = clamp(dot(n, ld), 0.0, 1.0);
     let rim = pow(1.0 - clamp(dot(n, -rd), 0.0, 1.0), 3.0);
-    var surf = vec3f(0.012, 0.018, 0.035) * (0.5 + 0.8 * dif) + tint * rim * 0.12;
+    // light on the buildings: the facade colour is lit by the key light, the sky (from above) and the
+    // horizon glow (from the side), plus the glowing core, which lights what is near it
+    let albedo = vec3f(0.07, 0.09, 0.14);
+    let skyFill = 0.25 + 0.35 * clamp(n.y * 0.5 + 0.5, 0.0, 1.0);
+    let horizonFill = clamp(1.0 - abs(n.y), 0.0, 1.0) * 0.3;
+    let toCore = vec3f(0.0, 8.0, 0.0) - p;
+    let coreDist = length(toCore);
+    let coreLight = clamp(dot(n, toCore / coreDist), 0.0, 1.0) * 4.0 / (1.0 + coreDist * coreDist * 0.05);
+    var surf = albedo * (skyFill + horizonFill + 1.1 * dif) + coreCol * coreLight * 0.3 * u.b.z + tint * rim * 0.16;
     if (hit < 0.5) {
       let g = abs(fract(p.xz / 3.0 + 0.5) - vec2f(0.5));
       let street = smoothstep(0.46, 0.5, max(g.x, g.y));
       let pulse = 0.5 + 0.5 * sin(length(p.xz) * 0.8 - t * 2.5);
-      surf = vec3f(0.004, 0.006, 0.012) + tint * street * (0.5 + 1.2 * pulse) * exp(-dist * 0.05);
+      let fade = exp(-dist * 0.05);
+      let c = circuit(p.xz / 0.75, 0.02 + dist * 0.004, t);
+      let padCol = mix(tint, coreCol, 0.5);
+      surf = vec3f(0.008, 0.012, 0.022) + coreCol * coreLight * 0.12 * u.b.z
+        + tint * street * (0.4 + 1.0 * pulse) * fade
+        + (tint * (c.x * 0.38 + c.z * 1.3) + padCol * c.y * 1.0) * exp(-dist * 0.042);
     } else if (hit < 1.5) {
       let id = floor(p.xz / 3.0 + 0.5);
       let wy = step(0.55, fract(p.y * 2.2));
