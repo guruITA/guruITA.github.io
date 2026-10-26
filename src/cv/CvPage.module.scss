@@ -21,6 +21,17 @@
 // the same button as 'View projects' on the portfolio
 .download {
   @include buttons.primary-action;
+
+  // while the PDF is on its way, and for a moment after it was saved
+  &[aria-disabled='true'] {
+    cursor: default;
+    opacity: 0.75;
+    transform: none;
+  }
+
+  &[aria-busy='true'] {
+    cursor: progress;
+  }
 }
 
 .sheet {
