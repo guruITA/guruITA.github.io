@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
 import cityShaderSource from '../../../../shaders/city-shader.ts?raw';
+import BackgroundErrorBoundary from '../BackgroundErrorBoundary';
+import { canUseWebGL, isLowPowerDevice } from '../deviceProfile';
 import { canRunFigmaShader, runFigmaShader } from './figmaShaderHost';
 
 // Three.js only downloads for browsers that need the fallback
@@ -8,7 +10,10 @@ const WorldBackground = lazy(() => import('../WorldBackground/WorldBackground'))
 
 import styles from './ShaderBackground.module.scss';
 
-type Mode = 'checking' | 'shader' | 'fallback';
+// static: no WebGPU and no WebGL, only the plain background colour
+type Mode = 'checking' | 'shader' | 'fallback' | 'static';
+
+const fallbackMode = (): Mode => (canUseWebGL() ? 'fallback' : 'static');
 
 // The 3D city from the Figma design: the same shader file runs in Figma and here.
 // Scroll position drives the camera; browsers without WebGPU get the Three.js world instead.
@@ -20,13 +25,24 @@ function ShaderBackground() {
         let cancelled = false;
         canRunFigmaShader().then((supported) => {
             if (!cancelled) {
-                setMode(supported ? 'shader' : 'fallback');
+                setMode(supported ? 'shader' : fallbackMode());
             }
         });
         return () => {
             cancelled = true;
         };
     }, []);
+
+    // without WebGPU or WebGL the page is usually drawn in software, so index.scss pauses the looping animations
+    useEffect(() => {
+        if (mode !== 'static') {
+            return;
+        }
+        document.documentElement.dataset.background = 'static';
+        return () => {
+            delete document.documentElement.dataset.background;
+        };
+    }, [mode]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -35,6 +51,7 @@ function ShaderBackground() {
         }
 
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const lowPower = isLowPowerDevice();
         let target = 0;
         let progress = 0;
         let easeFrameId = 0;
@@ -57,10 +74,26 @@ function ShaderBackground() {
 
         let stop: (() => void) | null = null;
         let disposed = false;
-        runFigmaShader(canvas, cityShaderSource, {
-            progress: () => progress,
-            speed: () => (reduceMotion ? 0 : 1),
-        })
+        const switchToFallback = () => {
+            if (!disposed) {
+                setMode(fallbackMode());
+            }
+        };
+        runFigmaShader(
+            canvas,
+            cityShaderSource,
+            {
+                progress: () => progress,
+                speed: () => (reduceMotion ? 0 : 1),
+            },
+            {
+                maxPixelRatio: lowPower ? 1 : 1.25,
+                // weaker devices drop to 30 fps once the camera has stopped moving
+                idleFps: lowPower ? 30 : 60,
+                idle: () => Math.abs(target - progress) < 0.0005,
+                onDeviceLost: switchToFallback,
+            },
+        )
             .then((stopShader) => {
                 if (disposed) {
                     stopShader();
@@ -68,11 +101,7 @@ function ShaderBackground() {
                     stop = stopShader;
                 }
             })
-            .catch(() => {
-                if (!disposed) {
-                    setMode('fallback');
-                }
-            });
+            .catch(switchToFallback);
 
         return () => {
             disposed = true;
@@ -83,11 +112,19 @@ function ShaderBackground() {
         };
     }, [mode]);
 
+    const plainBackground = <div className={styles.background} aria-hidden="true" />;
+
+    if (mode === 'static') {
+        return plainBackground;
+    }
+
     if (mode === 'fallback') {
         return (
-            <Suspense fallback={<div className={styles.background} aria-hidden="true" />}>
-                <WorldBackground />
-            </Suspense>
+            <BackgroundErrorBoundary fallback={plainBackground}>
+                <Suspense fallback={plainBackground}>
+                    <WorldBackground />
+                </Suspense>
+            </BackgroundErrorBoundary>
         );
     }
 

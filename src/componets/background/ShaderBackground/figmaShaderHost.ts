@@ -1,6 +1,8 @@
 // Runs a Figma shader (its unchanged main.ts from the Figma library) on a canvas.
 // The shader receives the same frame object Figma gives it: output, params, state, time and mouse.
 
+import { createFrameLimiter } from '../frameLimiter';
+
 type ShaderParams = Record<string, unknown>;
 
 interface ShaderFrame {
@@ -21,6 +23,19 @@ interface ShaderModule {
 }
 
 export type LiveParams = Record<string, () => unknown>;
+
+export interface ShaderOptions {
+    maxPixelRatio?: number;
+    // frame rate while idle() is true, to save battery when nothing moves
+    idleFps?: number;
+    idle?: () => boolean;
+    // the GPU was reset or removed (driver update, tab evicted on a phone)
+    onDeviceLost?: () => void;
+}
+
+// 120 and 144 Hz screens would otherwise render the background twice as often
+const MAX_FPS = 60;
+const ADAPTER_TIMEOUT_MS = 3000;
 
 function compileShaderModule(source: string): ShaderModule {
     let definitions: ShaderModule['definitions'] = {};
@@ -43,7 +58,9 @@ export async function canRunFigmaShader(): Promise<boolean> {
         return false;
     }
     try {
-        return (await navigator.gpu.requestAdapter()) !== null;
+        // some drivers never answer; treat that as no WebGPU
+        const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ADAPTER_TIMEOUT_MS));
+        return (await Promise.race([navigator.gpu.requestAdapter(), timeout])) !== null;
     } catch {
         return false;
     }
@@ -54,16 +71,22 @@ export async function runFigmaShader(
     canvas: HTMLCanvasElement,
     source: string,
     live: LiveParams,
-    maxPixelRatio = 1.25,
+    { maxPixelRatio = 1.25, idleFps = MAX_FPS, idle = () => false, onDeviceLost }: ShaderOptions = {},
 ): Promise<() => void> {
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) {
         throw new Error('No WebGPU adapter');
     }
     const device = await adapter.requestDevice();
+    device.lost.then((info) => {
+        if (info.reason !== 'destroyed') {
+            onDeviceLost?.();
+        }
+    });
     // TypeScript's DOM types have no getContext('webgpu') overload yet
     const context = canvas.getContext('webgpu') as GPUCanvasContext | null;
     if (!context) {
+        device.destroy();
         throw new Error('No WebGPU canvas context');
     }
     const format = navigator.gpu.getPreferredCanvasFormat();
@@ -93,22 +116,40 @@ export async function runFigmaShader(
 
     const handleResize = () => {
         const ratio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
-        canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
-        canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
-        frame.output.width = canvas.width;
-        frame.output.height = canvas.height;
+        const width = Math.max(1, Math.round(canvas.clientWidth * ratio));
+        const height = Math.max(1, Math.round(canvas.clientHeight * ratio));
+        // mobile toolbars fire resize while scrolling; skip when the size did not change
+        if (width === canvas.width && height === canvas.height) {
+            return;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        frame.output.width = width;
+        frame.output.height = height;
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     window.addEventListener('pointermove', handlePointer, { passive: true });
 
-    shader.setup(device, frame);
+    try {
+        shader.setup(device, frame);
+    } catch (error) {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('pointermove', handlePointer);
+        device.destroy();
+        throw error;
+    }
 
     let animationFrameId = 0;
     const start = performance.now();
     let last = start;
+    const shouldRender = createFrameLimiter();
     const tick = (now: number) => {
+        animationFrameId = requestAnimationFrame(tick);
+        if (!shouldRender(now, idle() ? idleFps : MAX_FPS)) {
+            return;
+        }
         frame.deltaTime = now - last;
         frame.time = now - start;
         last = now;
@@ -117,7 +158,6 @@ export async function runFigmaShader(
         }
         shader.render(device, frame);
         frame.frame += 1;
-        animationFrameId = requestAnimationFrame(tick);
     };
     animationFrameId = requestAnimationFrame(tick);
 
