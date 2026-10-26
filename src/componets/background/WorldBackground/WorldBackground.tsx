@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { isLowPowerDevice } from '../deviceProfile';
+import { createFrameLimiter } from '../frameLimiter';
 import styles from './WorldBackground.module.scss';
 
 type GradientStop = {
@@ -514,6 +516,8 @@ function WorldBackground() {
         const prefersReducedMotion = window.matchMedia(
             '(prefers-reduced-motion: reduce)',
         ).matches;
+        // phones and weaker laptops skip antialiasing, shadows and bloom and render at 1x
+        const lowPower = isLowPowerDevice();
 
         const gradientStops: GradientStop[] = [
             { t: 0, color: new THREE.Color(readCssColor('--color-blue', '#539bef')) },
@@ -534,12 +538,16 @@ function WorldBackground() {
             100,
         );
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        const renderer = new THREE.WebGLRenderer({
+            antialias: !lowPower,
+            alpha: true,
+            powerPreference: lowPower ? 'low-power' : 'high-performance',
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5));
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.1;
-        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.enabled = !lowPower;
         renderer.shadowMap.type = THREE.PCFShadowMap;
         container.appendChild(renderer.domElement);
 
@@ -618,15 +626,20 @@ function WorldBackground() {
             return { mesh, material, phase };
         });
 
-        const composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(container.clientWidth, container.clientHeight),
-            0.45,
-            0.35,
-            0.2,
-        );
-        composer.addPass(bloomPass);
+        // bloom renders the scene several extra times, so low-power devices go without it
+        let composer: EffectComposer | null = null;
+        let bloomPass: UnrealBloomPass | null = null;
+        if (!lowPower) {
+            composer = new EffectComposer(renderer);
+            composer.addPass(new RenderPass(scene, camera));
+            bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(container.clientWidth, container.clientHeight),
+                0.45,
+                0.35,
+                0.2,
+            );
+            composer.addPass(bloomPass);
+        }
 
         const targetProgressRef = { current: 0 };
         let smoothedProgress = 0;
@@ -650,10 +663,22 @@ function WorldBackground() {
             camera.lookAt(tmpLookAt);
             landmarkLight.position.copy(tmpLookAt);
 
-            composer.render();
+            if (composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
         };
 
-        const animate = () => {
+        // 120 and 144 Hz screens would otherwise render the scene twice as often
+        const shouldRender = createFrameLimiter();
+        const animate = (now = performance.now()) => {
+            animationFrameId = requestAnimationFrame(animate);
+            const idle = Math.abs(targetProgressRef.current - smoothedProgress) < 0.0005;
+            if (!shouldRender(now, lowPower && idle ? 30 : 60)) {
+                return;
+            }
+
             timer.update();
             const delta = timer.getDelta();
             const elapsed = timer.getElapsed();
@@ -682,7 +707,6 @@ function WorldBackground() {
             });
 
             renderFrame();
-            animationFrameId = requestAnimationFrame(animate);
         };
 
         const updateProgress = () => {
@@ -700,7 +724,7 @@ function WorldBackground() {
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
-            composer.setSize(width, height);
+            composer?.setSize(width, height);
 
             if (prefersReducedMotion) {
                 renderFrame();
@@ -742,8 +766,8 @@ function WorldBackground() {
             cancelAnimationFrame(animationFrameId);
 
             disposables.forEach((disposable) => disposable.dispose());
-            bloomPass.dispose();
-            composer.dispose();
+            bloomPass?.dispose();
+            composer?.dispose();
             renderer.dispose();
 
             if (renderer.domElement.parentElement === container) {

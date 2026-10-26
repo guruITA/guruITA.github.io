@@ -8,6 +8,14 @@ html {
   scroll-behavior: smooth;
 }
 
+// set by ShaderBackground when the device has no WebGPU or WebGL; such devices usually draw
+// the page without the GPU too, and the looping decorations then cost most of the frame budget
+html[data-background='static'] *,
+html[data-background='static'] *::before,
+html[data-background='static'] *::after {
+  animation-play-state: paused !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;
