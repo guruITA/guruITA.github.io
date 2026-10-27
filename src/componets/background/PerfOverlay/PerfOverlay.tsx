@@ -70,6 +70,7 @@ function PerfOverlay() {
                 background {perfStats.backgroundMode}
                 {perfStats.backgroundRatio > 0 && ` @ ${perfStats.backgroundRatio.toFixed(2)}x`}
             </div>
+            {perfStats.backgroundReason && <div className={styles.reason}>why: {perfStats.backgroundReason}</div>}
             <div>
                 canvases {snapshot.canvases} · lost {snapshot.lost}
             </div>

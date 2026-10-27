@@ -64,22 +64,30 @@ export function webglGpuVendor(): string {
     return vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : '');
 }
 
-// Pixels per second of the city shader a GPU keeps up without slowing down. An Intel UHD 630 kept
-// about 11 million and then stayed smooth; heavier loads made it drop to 10 fps after 7-14 seconds.
-// Phones and integrated GPUs (also unknown ones) stay under that. A dedicated NVIDIA GPU keeps its
-// speed and Apple's GPUs are much stronger; AMD is often integrated in laptops.
-export function cityPixelsPerSecond(vendor: string, lowPower: boolean): number {
+export interface GpuBudget {
+    // pixels per second of the city shader the GPU keeps up without slowing down
+    pixelsPerSecond: number;
+    // whether the resolution may go above the budget after a long run of fast frames (see adaptiveResolution)
+    raiseAboveBudget: boolean;
+}
+
+// An Intel UHD 630 kept about 11 million city pixels per second and then stayed smooth; heavier loads
+// made it drop to 10 fps after 7-14 seconds, because integrated GPUs share their power with the CPU.
+// Phones and integrated GPUs (also unknown ones) start under that and stay there. Dedicated NVIDIA GPUs
+// and Apple's GPUs in Macs keep their speed, so the budget is only their starting point. AMD is often
+// integrated in laptops, but its integrated GPUs are several times faster than that Intel one.
+export function cityBudget(vendor: string, lowPower: boolean): GpuBudget {
     if (lowPower) {
-        return 8_000_000;
+        return { pixelsPerSecond: 8_000_000, raiseAboveBudget: false };
     }
     switch (vendor) {
         case 'nvidia':
-            return 60_000_000;
+            return { pixelsPerSecond: 60_000_000, raiseAboveBudget: true };
         case 'apple':
-            return 40_000_000;
+            return { pixelsPerSecond: 40_000_000, raiseAboveBudget: true };
         case 'amd':
-            return 15_000_000;
+            return { pixelsPerSecond: 20_000_000, raiseAboveBudget: false };
         default:
-            return 10_000_000;
+            return { pixelsPerSecond: 10_000_000, raiseAboveBudget: false };
     }
 }

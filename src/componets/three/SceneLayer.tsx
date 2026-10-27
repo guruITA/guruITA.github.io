@@ -1,22 +1,29 @@
 import { useEffect } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { View } from '@react-three/drei';
+import { FrameDriver } from './SceneCanvas';
 import { lowPower, sceneDpr } from './sceneQuality';
+import { useAnySceneAnimating } from './sceneLayerStore';
 
 // The canvas is fixed to the screen, so the scenes only follow the page when a frame is drawn
 function ScrollInvalidate() {
     const invalidate = useThree((state) => state.invalidate);
 
     useEffect(() => {
-        // two frames: drei draws a view that just scrolled into the screen one frame late, and without
-        // idle frames (reduced motion) nothing else would draw it
-        const redraw = () => invalidate(2);
+        // one frame per scroll event (they come about once a frame; more would queue up frames), and two
+        // once scrolling stops: drei draws a view that just came into the screen one frame late, and without
+        // idle frames (reduced motion) nothing else would draw it. A timer, as Safari has no scrollend.
+        let settle = 0;
+        const redraw = () => {
+            invalidate();
+            clearTimeout(settle);
+            settle = window.setTimeout(() => invalidate(2), 120);
+        };
         window.addEventListener('scroll', redraw, { passive: true });
-        window.addEventListener('scrollend', redraw);
         window.addEventListener('resize', redraw);
         return () => {
+            clearTimeout(settle);
             window.removeEventListener('scroll', redraw);
-            window.removeEventListener('scrollend', redraw);
             window.removeEventListener('resize', redraw);
         };
     }, [invalidate]);
@@ -28,6 +35,8 @@ function ScrollInvalidate() {
 // Phones keep only a few WebGL contexts alive and drop the oldest; one canvas per scene lost scenes there,
 // and each extra canvas also costs a context switch and a composited layer every frame.
 function SceneLayer() {
+    const animating = useAnySceneAnimating();
+
     return (
         <Canvas
             // above the sections, below the navbar (z-index 20), so scenes do not draw over the menu;
@@ -45,6 +54,7 @@ function SceneLayer() {
             resize={{ scroll: false }}
         >
             <ScrollInvalidate />
+            <FrameDriver running={animating} />
             <View.Port />
         </Canvas>
     );
