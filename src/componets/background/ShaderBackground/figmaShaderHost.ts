@@ -16,7 +16,8 @@ interface ShaderFrame {
     mousePosition: { x: number; y: number } | null;
 }
 
-interface ShaderModule {
+// A Figma shader loaded with `import * as shader from '…/shader.ts?figma-shader'` (see vite.config.ts).
+export interface ShaderModule {
     setup: (device: GPUDevice, frame: ShaderFrame) => void;
     render: (device: GPUDevice, frame: ShaderFrame) => void;
     definitions: Record<string, { defaultValue?: unknown }>;
@@ -37,22 +38,6 @@ export interface ShaderOptions {
 const MAX_FPS = 60;
 const ADAPTER_TIMEOUT_MS = 3000;
 
-function compileShaderModule(source: string): ShaderModule {
-    let definitions: ShaderModule['definitions'] = {};
-    const body = source
-        .replace(/^\s*import\s*\{\s*defineProperties\s*\}\s*from\s*["']figma:shaders["'];?\s*$/m, '')
-        .replace(/export\s+default\s+function\s+Effect/, 'function Effect')
-        .replace(/export\s+function\s+setup/, 'function setup')
-        .replace(/export\s+function\s+render/, 'function render');
-    const defineProperties = (_effect: unknown, props: ShaderModule['definitions']) => {
-        definitions = props;
-    };
-    const exports = new Function('defineProperties', `${body}\nreturn { setup, render };`)(
-        defineProperties,
-    ) as Pick<ShaderModule, 'setup' | 'render'>;
-    return { ...exports, definitions };
-}
-
 export async function canRunFigmaShader(): Promise<boolean> {
     if (!('gpu' in navigator) || !navigator.gpu) {
         return false;
@@ -69,7 +54,7 @@ export async function canRunFigmaShader(): Promise<boolean> {
 // Starts the shader on the canvas and returns a function that stops it.
 export async function runFigmaShader(
     canvas: HTMLCanvasElement,
-    source: string,
+    shader: ShaderModule,
     live: LiveParams,
     { maxPixelRatio = 1.25, idleFps = MAX_FPS, idle = () => false, onDeviceLost }: ShaderOptions = {},
 ): Promise<() => void> {
@@ -92,7 +77,6 @@ export async function runFigmaShader(
     const format = navigator.gpu.getPreferredCanvasFormat();
     context.configure({ device, format, alphaMode: 'opaque' });
 
-    const shader = compileShaderModule(source);
     const params: ShaderParams = Object.fromEntries(
         Object.entries(shader.definitions).map(([name, definition]) => [name, definition.defaultValue]),
     );

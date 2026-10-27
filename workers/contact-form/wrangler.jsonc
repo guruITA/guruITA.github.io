@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "guruita-contact-form",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "vars": {
+    // Sites that may send the form; comma separated. Local dev adds http://localhost:5173 in .dev.vars.
+    "ALLOWED_ORIGINS": "https://guruita.dev",
+    // Caps for the whole form; the monthly one stays below Formspree's free quota of 50 messages.
+    "DAILY_LIMIT": "10",
+    "MONTHLY_LIMIT": "45"
+  },
+  "ratelimits": [
+    // Per visitor IP: at most 3 messages per minute.
+    // Counted per Cloudflare location, so a spread-out attack gets more; the quota below is exact.
+    { "name": "IP_LIMITER", "namespace_id": "1001", "simple": { "limit": 3, "period": 60 } }
+  ],
+  // Exact daily and monthly count of forwarded messages (src/index.ts, MessageQuota).
+  "durable_objects": {
+    "bindings": [{ "name": "MESSAGE_QUOTA", "class_name": "MessageQuota" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MessageQuota"] }]
+  // Secrets (set with `npx wrangler secret put <NAME>`, never in this file):
+  //   TURNSTILE_SECRET    secret key of the Cloudflare Turnstile widget
+  //   FORMSPREE_ENDPOINT  https://formspree.io/f/... (kept here so nobody can post to it directly)
+}

@@ -34,10 +34,38 @@ jobs:
 
       - run: npm run lint
 
+      # The contact form needs both values, and must post to the contact Worker (workers/contact-form),
+      # never straight to Formspree, which would skip all spam checks.
+      - name: Check contact form settings
+        env:
+          ENDPOINT: ${{ vars.VITE_CONTACT_FORM_ENDPOINT }}
+          SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
+        run: |
+          if [ -z "$ENDPOINT" ] && [ -z "$SITE_KEY" ]; then
+            echo "::warning::VITE_CONTACT_FORM_ENDPOINT and VITE_TURNSTILE_SITE_KEY are not set; the contact form will show an error"
+            exit 0
+          fi
+          if [ -z "$ENDPOINT" ] || [ -z "$SITE_KEY" ]; then
+            echo "::error::Set both VITE_CONTACT_FORM_ENDPOINT and VITE_TURNSTILE_SITE_KEY, or neither"
+            exit 1
+          fi
+          case "$ENDPOINT" in
+            https://formspree.io/*|https://*.formspree.io/*)
+              echo "::error::VITE_CONTACT_FORM_ENDPOINT points to Formspree; it must be the contact Worker URL"
+              exit 1 ;;
+            https://*) ;;
+            *)
+              echo "::error::VITE_CONTACT_FORM_ENDPOINT must be an https URL"
+              exit 1 ;;
+          esac
+
       - run: npm run build
         env:
-          # public form endpoint (Settings > Secrets and variables > Actions > Variables); the form shows a notice when empty
+          # public values (Settings > Secrets and variables > Actions > Variables); the form shows an error when empty
+          # URL of the contact Worker (workers/contact-form)
           VITE_CONTACT_FORM_ENDPOINT: ${{ vars.VITE_CONTACT_FORM_ENDPOINT }}
+          # Cloudflare Turnstile site key
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
 
       - uses: actions/configure-pages@v6
 
