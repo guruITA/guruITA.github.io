@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
-import cityShaderSource from '../../../../shaders/city-shader.ts?raw';
+import * as cityShader from '../../../../shaders/city-shader.ts?figma-shader';
 import BackgroundErrorBoundary from '../BackgroundErrorBoundary';
 import { canUseWebGL, isLowPowerDevice } from '../deviceProfile';
 import { canRunFigmaShader, runFigmaShader } from './figmaShaderHost';
@@ -81,7 +81,7 @@ function ShaderBackground() {
         };
         runFigmaShader(
             canvas,
-            cityShaderSource,
+            cityShader,
             {
                 progress: () => progress,
                 speed: () => (reduceMotion ? 0 : 1),

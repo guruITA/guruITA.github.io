@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `npm run dev`. .dev.vars is gitignored.
+ALLOWED_ORIGINS=http://localhost:5173
+# Cloudflare's test secret that always passes: https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+FORMSPREE_ENDPOINT=http://127.0.0.1:5199/f/test
