@@ -18,7 +18,6 @@ html[data-background='static'] *::after {
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
   // Arimo has Arial's metrics and exists in Figma, so the design file and the site set the same type

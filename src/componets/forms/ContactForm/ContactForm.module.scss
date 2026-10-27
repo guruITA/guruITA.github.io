@@ -109,6 +109,11 @@
     cursor: progress;
     transform: none;
   }
+
+  // as wide as the fields on phones, like the other buttons there
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 }
 
 .statusMessage {

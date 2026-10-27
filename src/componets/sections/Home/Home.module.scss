@@ -42,6 +42,11 @@
   // the profile orbit reaches past the viewport; without this, phones zoom the page out to fit it
   overflow-x: clip;
 
+  // older browsers (e.g. Safari before 16) do not know clip
+  @supports not (overflow-x: clip) {
+    overflow-x: hidden;
+  }
+
   &::before {
     background:
       linear-gradient(90deg, rgba(2, 7, 19, 0.94) 0%, rgba(2, 7, 19, 0.72) 43%, transparent 72%),
@@ -272,6 +277,11 @@
   }
 }
 
+// keeps a word like 'full-stack' from breaking at its hyphen
+.noWrap {
+  white-space: nowrap;
+}
+
 .sectionHeading {
   max-width: 720px;
 
@@ -279,11 +289,13 @@
     margin: 0 0 1rem;
   }
 
+  // balance spreads the words over the lines, so no single word ends up alone
   h2 {
     margin: 0;
     font-size: clamp(1.9rem, 2.92vw, 2.625rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
+    text-wrap: balance;
   }
 
   > p:last-child {
@@ -386,6 +398,7 @@
 }
 
 .projectCard {
+  position: relative;
   min-height: 420px;
   padding: 1.6rem;
   border-radius: 1.25rem;
@@ -432,10 +445,29 @@
 
   > a {
     margin-top: auto;
+    align-self: flex-start;
     color: var(--color-blue-bright);
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 700;
+
+    // the link covers the whole card, so a click or tap anywhere on the card opens it
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 1.25rem;
+    }
+
+    // keyboard focus shows a ring around the whole card instead of only the text
+    &:focus-visible {
+      outline: none;
+
+      &::before {
+        outline: 2px solid var(--color-cyan);
+        outline-offset: 3px;
+      }
+    }
   }
 }
 
@@ -549,6 +581,7 @@
     font-size: clamp(1.85rem, 2.78vw, 2.5rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
+    text-wrap: balance;
   }
 
   > p:not(.eyebrow) {
@@ -598,9 +631,9 @@
 }
 
 @media (max-width: 768px) {
+  // sections are as tall as their content, so there are no empty screens between them
   .section {
-    min-height: 100svh;
-    padding: 7rem 0 5rem;
+    padding: 3.5rem 0;
     align-items: flex-start;
   }
 
@@ -640,12 +673,13 @@
   }
 
   .hero h1 {
-    font-size: clamp(3rem, 14vw, 4.6rem);
+    font-size: clamp(2.4rem, 10.5vw, 4rem);
   }
 
   .hero h2 {
     margin-top: 1.25rem;
-    font-size: clamp(1.65rem, 8vw, 2.5rem);
+    font-size: clamp(1.35rem, 6.2vw, 2rem);
+    text-wrap: balance;
   }
 
   .heroDescription {
@@ -654,12 +688,7 @@
   }
 
   .actions {
-    flex-direction: column;
-  }
-
-  .primaryAction,
-  .secondaryAction {
-    width: 100%;
+    justify-content: center;
   }
 
   .scrollCue {
@@ -672,9 +701,8 @@
   }
 
   .valueStrip {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
     padding: 1.5rem;
+    text-align: center;
   }
 
   .about {
@@ -683,16 +711,23 @@
     }
   }
 
+  // one centered axis: headings sit in the middle like the hero and contact; card text stays left
   .sectionHeading {
+    margin-inline: auto;
+    text-align: center;
+
     h2 {
-      font-size: clamp(2.45rem, 12vw, 4rem);
+      font-size: clamp(1.75rem, 7.5vw, 2.5rem);
+    }
+
+    > p:last-child {
+      margin-inline: auto;
     }
   }
 
   .projectGrid,
   .skillGrid {
     margin-top: 3rem;
-    grid-template-columns: 1fr;
   }
 
   .aboutScene {
@@ -702,8 +737,35 @@
     height: 7rem;
   }
 
+  // the empty top of the preview is room for the hover animation, which touch screens never show;
+  // tuck it under the tags so the card has no empty block
   .projectScene {
     height: 8.5rem;
+    margin-top: -2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  // project cards follow the centered axis: number with a short line under it, then centered text
+  .projectCard {
+    text-align: center;
+
+    ul {
+      justify-content: center;
+    }
+
+    > a {
+      align-self: center;
+    }
+  }
+
+  // number in the middle with a line on both sides, fading out towards the card edges
+  .projectTopline {
+    &::before {
+      content: '';
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, transparent, rgba(83, 155, 239, 0.65));
+    }
   }
 
   .projectCard,
@@ -719,6 +781,56 @@
     border-radius: 1.5rem;
   }
 
+}
+
+// phones: one column and full-width buttons; tablets keep the wider layout above
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    width: 100%;
+  }
+
+  .valueStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .skillGrid {
+    grid-template-columns: 1fr;
+  }
+
+  // icon on the left, title and text in one column next to it, so a card is only as tall as its text
+  .skillCard {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1rem;
+
+    .skillIcon,
+    > span {
+      grid-row: span 2;
+    }
+
+    .skillIcon {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    h3 {
+      margin: 0.1rem 0 0.4rem;
+    }
+
+    p {
+      grid-column: 2;
+    }
+  }
+
+  .contactPanel {
+    padding: 2.25rem 1.25rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
