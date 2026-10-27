@@ -1,10 +1,9 @@
 // Runs a Figma shader (its unchanged main.ts from the Figma library) on a canvas.
 // The shader receives the same frame object Figma gives it: output, params, state, time and mouse.
 
-import { createAdaptiveResolution } from '../adaptiveResolution';
 import type { GpuBudget } from '../deviceProfile';
-import { createFrameLimiter } from '../frameLimiter';
 import { perfStats } from '../perfStats';
+import { MAX_FPS, startShaderLoop } from './shaderLoop';
 
 type ShaderParams = Record<string, unknown>;
 
@@ -43,8 +42,6 @@ export interface ShaderOptions {
     onDeviceLost?: () => void;
 }
 
-// 120 and 144 Hz screens would otherwise render the background twice as often
-const MAX_FPS = 60;
 const ADAPTER_TIMEOUT_MS = 3000;
 
 // Chrome 113-126 (and browsers built on it, such as Samsung Internet) have WebGPU but no adapter.info
@@ -130,85 +127,32 @@ export async function runFigmaShader(
         mousePosition: null,
     };
 
-    const handlePointer = (event: PointerEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        const scale = canvas.width / Math.max(rect.width, 1);
-        frame.mousePosition = { x: (event.clientX - rect.left) * scale, y: (event.clientY - rect.top) * scale };
-    };
-
-    const maxRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
-    const resolution = createAdaptiveResolution({
-        maxRatio,
-        minRatio: Math.min(minPixelRatio, maxRatio),
-        ...gpuBudget,
-        fps: MAX_FPS,
-        onTooSlow,
-    });
-
-    // the CSS size is read on resize only; reading it every frame could force an extra layout
-    let cssWidth = 0;
-    let cssHeight = 0;
-    const applySize = () => {
-        const width = Math.max(1, Math.round(cssWidth * resolution.ratio));
-        const height = Math.max(1, Math.round(cssHeight * resolution.ratio));
-        // mobile toolbars fire resize while scrolling; skip when the size did not change
-        if (width === canvas.width && height === canvas.height) {
-            return;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        frame.output.width = width;
-        frame.output.height = height;
-    };
-    const handleResize = () => {
-        cssWidth = canvas.clientWidth;
-        cssHeight = canvas.clientHeight;
-        resolution.setCssSize(cssWidth, cssHeight);
-        applySize();
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('pointermove', handlePointer, { passive: true });
-
     try {
         shader.setup(device, frame);
     } catch (error) {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('pointermove', handlePointer);
         device.destroy();
         throw error;
     }
 
-    let animationFrameId = 0;
-    const start = performance.now();
-    let last = start;
-    const shouldRender = createFrameLimiter();
-    const tick = (now: number) => {
-        animationFrameId = requestAnimationFrame(tick);
-        const targetFps = idle() ? idleFps : MAX_FPS;
-        if (!shouldRender(now, targetFps)) {
-            return;
-        }
-        resolution.sample(now, targetFps);
-        // a no-op unless the resolution changed
-        applySize();
-        perfStats.backgroundRatio = resolution.ratio;
-        frame.deltaTime = now - last;
-        frame.time = now - start;
-        last = now;
-        for (const [name, read] of Object.entries(live)) {
-            params[name] = read();
-        }
-        shader.render(device, frame);
-        frame.frame += 1;
-    };
-    animationFrameId = requestAnimationFrame(tick);
+    const stopLoop = startShaderLoop(
+        canvas,
+        ({ width, height, time, deltaTime, mouse }) => {
+            frame.output.width = width;
+            frame.output.height = height;
+            frame.time = time;
+            frame.deltaTime = deltaTime;
+            frame.mousePosition = mouse;
+            for (const [name, read] of Object.entries(live)) {
+                params[name] = read();
+            }
+            shader.render(device, frame);
+            frame.frame += 1;
+        },
+        { maxPixelRatio, minPixelRatio, budget: gpuBudget, idleFps, idle, onTooSlow },
+    );
 
     return () => {
-        cancelAnimationFrame(animationFrameId);
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('pointermove', handlePointer);
+        stopLoop();
         context.unconfigure();
         device.destroy();
     };

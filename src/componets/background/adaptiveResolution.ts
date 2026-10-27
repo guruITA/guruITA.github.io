@@ -33,6 +33,9 @@ const LOWERINGS_TO_DECIDE = 2;
 // stalls of chunks and shader compiles loading); a 30 fps cap never gets there
 const HOPELESS_MS = 1000 / 15;
 const HOPELESS_WINDOWS = 8;
+// Too slow for good: slow (see SLOW_FACTOR) at the lowest resolution for this many windows (8 s); a lighter
+// background then serves the page better than one that keeps it under 48 fps
+const SLOW_AT_MINIMUM_WINDOWS = 16;
 // Room to spare: frames within a tenth of the target, for this many windows in a row
 const FAST_FACTOR = 1.1;
 const FAST_WINDOWS_TO_RAISE = 6;
@@ -84,6 +87,7 @@ export function createAdaptiveResolution({
     let fastWindows = 0;
     let slowWindows = 0;
     let hopelessWindows = 0;
+    let slowAtMinimumWindows = 0;
     let gaveUp = false;
     // a frame cap found by lowering the resolution without effect; 0 while none is known
     let paceMs = 0;
@@ -98,7 +102,9 @@ export function createAdaptiveResolution({
     // pixels actually rendered: the budget kept between the lowest and highest ratio
     const effective = () => Math.min(maxRatio * maxRatio * cssArea, Math.max(minRatio * minRatio * cssArea, pixels));
     const ratio = () => Math.sqrt(effective() / cssArea);
-    const atMinimum = () => pixels <= minRatio * minRatio * cssArea;
+    // within a fifth of the fewest pixels counts as the minimum: a smaller step down changes too little
+    // to tell whether it helped, which would read as a frame cap
+    const atMinimum = () => effective() <= minRatio * minRatio * cssArea * 1.2;
     const atMaximum = () => pixels >= maxRatio * maxRatio * cssArea;
 
     const judge = (averageMs: number, frameTargetMs: number) => {
@@ -127,14 +133,15 @@ export function createAdaptiveResolution({
             }
         }
 
+        const targetMs = Math.max(frameTargetMs, paceMs);
         hopelessWindows = atMinimum() && averageMs > HOPELESS_MS ? hopelessWindows + 1 : 0;
-        if (hopelessWindows >= HOPELESS_WINDOWS && !gaveUp) {
+        slowAtMinimumWindows = atMinimum() && averageMs > targetMs * SLOW_FACTOR ? slowAtMinimumWindows + 1 : 0;
+        if ((hopelessWindows >= HOPELESS_WINDOWS || slowAtMinimumWindows >= SLOW_AT_MINIMUM_WINDOWS) && !gaveUp) {
             gaveUp = true;
             onTooSlow?.();
             return;
         }
 
-        const targetMs = Math.max(frameTargetMs, paceMs);
         if (averageMs > targetMs * SLOW_FACTOR) {
             fastWindows = 0;
             slowWindows += 1;

@@ -715,12 +715,12 @@ function WorldBackground({ onTooSlow }: WorldBackgroundProps) {
         const animate = (now = performance.now()) => {
             animationFrameId = requestAnimationFrame(animate);
             const idle = Math.abs(targetProgressRef.current - smoothedProgress) < 0.0005;
+            // every page frame counts, also those the scene skips (see shaderLoop)
+            resolution.sample(now, 60);
             // 30 fps once the camera has stopped, which halves the GPU load while reading
-            const targetFps = idle ? 30 : 60;
-            if (!shouldRender(now, targetFps)) {
+            if (!shouldRender(now, idle ? 30 : 60)) {
                 return;
             }
-            resolution.sample(now, targetFps);
             applyResolution();
 
             timer.update();
