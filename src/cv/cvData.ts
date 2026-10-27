@@ -37,8 +37,9 @@ export const cv: CvData = {
     summary:
         'Driven fourth-year Software Engineering student at the Amsterdam University of Applied Sciences, with a strong focus on back-end development and a passion for innovative solutions. Alongside my skills in Java, PHP and JavaScript, I have hands-on experience building apps with real impact, such as a damage detection app for the Red Cross and the host payment system of the Domits booking platform. With knowledge of Laravel, Spring Boot, Vue.js and Kotlin, I am an analytical problem solver who always strives for efficiency and quality. I enjoy learning and applying new technologies, and I am looking for a graduation internship where I can use my creativity and technical skills to add value to a dynamic team.',
     links: [
-        { label: 'Email', value: 'singhgurpreet14082002@gmail.com', href: 'mailto:singhgurpreet14082002@gmail.com' },
+        { label: 'Email', value: 'hello@guruita.dev', href: 'mailto:hello@guruita.dev' },
         { label: 'Phone', value: '+31 6 86215941', href: 'tel:+31686215941' },
+        { label: 'Website', value: 'guruita.dev', href: 'https://guruita.dev' },
         {
             label: 'LinkedIn',
             value: 'linkedin.com/in/gurpreet-singh2002',
