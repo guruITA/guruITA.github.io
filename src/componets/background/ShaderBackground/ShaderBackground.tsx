@@ -4,15 +4,17 @@ import * as cityShader from '../../../../shaders/city-shader.ts?figma-shader';
 import BackgroundErrorBoundary from '../BackgroundErrorBoundary';
 import { canUseWebGL, cityBudget, isLowPowerDevice } from '../deviceProfile';
 import { perfStats } from '../perfStats';
-import { canRunFigmaShader, runFigmaShader } from './figmaShaderHost';
+import { runCityWebgl } from './cityWebgl';
+import { canRunFigmaShader, runFigmaShader, type ShaderOptions } from './figmaShaderHost';
 
 // Three.js only downloads for browsers that need the fallback
 const WorldBackground = lazy(() => import('../WorldBackground/WorldBackground'));
 
 import styles from './ShaderBackground.module.scss';
 
-// static: no WebGPU and no WebGL, only the plain background colour
-type Mode = 'checking' | 'shader' | 'fallback' | 'static';
+// shader: the city with WebGPU; webgl: the same city with WebGL2 (browsers without WebGPU);
+// fallback: the lighter three.js world; static: no usable GPU, only the plain background colour
+type Mode = 'checking' | 'shader' | 'webgl' | 'fallback' | 'static';
 
 function fallbackMode(): Mode {
     if (canUseWebGL()) {
@@ -22,8 +24,11 @@ function fallbackMode(): Mode {
     return 'static';
 }
 
+// The city drawn with WebGL when WebGPU is missing or failed (Chrome has no WebGPU on many Android GPUs)
+const cityModeWithoutWebgpu = (): Mode => (canUseWebGL() ? 'webgl' : fallbackMode());
+
 // The 3D city from the Figma design: the same shader file runs in Figma and here.
-// Scroll position drives the camera; browsers without WebGPU get the Three.js world instead.
+// Scroll position drives the camera; browsers without WebGPU draw the same city with WebGL.
 function ShaderBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [mode, setMode] = useState<Mode>('checking');
@@ -32,7 +37,7 @@ function ShaderBackground() {
         let cancelled = false;
         canRunFigmaShader().then((supported) => {
             if (!cancelled) {
-                setMode(supported ? 'shader' : fallbackMode());
+                setMode(supported ? 'shader' : cityModeWithoutWebgpu());
             }
         });
         return () => {
@@ -54,7 +59,7 @@ function ShaderBackground() {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (mode !== 'shader' || !canvas) {
+        if ((mode !== 'shader' && mode !== 'webgl') || !canvas) {
             return;
         }
 
@@ -82,43 +87,61 @@ function ShaderBackground() {
 
         let stop: (() => void) | null = null;
         let disposed = false;
-        // the reason shows in the ?perf overlay, to tell why a device gets the three.js world
-        const switchToFallback = (reason: string) => {
+        // the reason shows in the ?perf overlay, to tell why a device left the WebGPU city
+        const switchTo = (next: Mode, reason: string) => {
             if (!disposed) {
                 perfStats.backgroundReason = reason;
-                setMode(fallbackMode());
+                setMode(next);
             }
         };
-        runFigmaShader(
-            canvas,
-            cityShader,
-            {
-                progress: () => progress,
-                speed: () => (reduceMotion ? 0 : 1),
-            },
-            {
-                maxPixelRatio: lowPower ? 1 : 1.25,
-                // Safari and Firefox may leave the vendor empty; a Mac then counts as Apple (older Intel Macs
-                // are caught by the frame rate check)
-                budget: (vendor) =>
-                    cityBudget(vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : ''), lowPower),
-                // the city moves little once the camera has stopped; 30 fps halves the GPU load while reading
-                idleFps: 30,
-                idle: () => Math.abs(target - progress) < 0.0005,
-                onDeviceLost: () => switchToFallback('WebGPU device lost'),
-                // the GPU cannot even draw the city at the lowest resolution: the three.js world is lighter,
-                // and it falls back to the static background in turn when that is too slow as well
-                onTooSlow: () => switchToFallback('city too slow on this GPU'),
-            },
-        )
-            .then((stopShader) => {
+        const live = {
+            progress: () => progress,
+            speed: () => (reduceMotion ? 0 : 1),
+        };
+        const options: ShaderOptions = {
+            maxPixelRatio: lowPower ? 1 : 1.25,
+            // Safari and Firefox may leave the vendor empty; a Mac then counts as Apple (older Intel Macs
+            // are caught by the frame rate check)
+            budget: (vendor) => cityBudget(vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : ''), lowPower),
+            // the city moves little once the camera has stopped; 30 fps halves the GPU load while reading
+            idleFps: 30,
+            idle: () => Math.abs(target - progress) < 0.0005,
+            // the GPU cannot even draw the city at the lowest resolution: the three.js world is lighter,
+            // and it falls back to the static background in turn when that is too slow as well
+            onTooSlow: () => switchTo(fallbackMode(), 'city too slow on this GPU'),
+        };
+
+        if (mode === 'webgl') {
+            // a microtask, so a failed start does not set state while this effect still runs
+            queueMicrotask(() => {
                 if (disposed) {
-                    stopShader();
-                } else {
-                    stop = stopShader;
+                    return;
                 }
+                try {
+                    stop = runCityWebgl(canvas, cityShader, live, {
+                        ...options,
+                        onDeviceLost: () => switchTo(fallbackMode(), 'WebGL context lost'),
+                    });
+                } catch (error) {
+                    switchTo(fallbackMode(), `WebGL city failed to start: ${String(error)}`);
+                }
+            });
+        } else {
+            runFigmaShader(canvas, cityShader, live, {
+                ...options,
+                onDeviceLost: () => switchTo(cityModeWithoutWebgpu(), 'WebGPU device lost'),
             })
-            .catch((error: unknown) => switchToFallback(`city failed to start: ${String(error)}`));
+                .then((stopShader) => {
+                    if (disposed) {
+                        stopShader();
+                    } else {
+                        stop = stopShader;
+                    }
+                })
+                .catch((error: unknown) =>
+                    switchTo(cityModeWithoutWebgpu(), `WebGPU city failed to start: ${String(error)}`),
+                );
+        }
 
         return () => {
             disposed = true;
@@ -152,7 +175,8 @@ function ShaderBackground() {
 
     return (
         <div className={styles.background} aria-hidden="true">
-            {mode === 'shader' && <canvas ref={canvasRef} />}
+            {/* a canvas that had a WebGPU context cannot get a WebGL one, so each city gets its own */}
+            {(mode === 'shader' || mode === 'webgl') && <canvas key={mode} ref={canvasRef} />}
         </div>
     );
 }
