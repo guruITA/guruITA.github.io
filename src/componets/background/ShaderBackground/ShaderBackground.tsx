@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
 import * as cityShader from '../../../../shaders/city-shader.ts?figma-shader';
 import BackgroundErrorBoundary from '../BackgroundErrorBoundary';
-import { canUseWebGL, cityPixelsPerSecond, isLowPowerDevice } from '../deviceProfile';
+import { canUseWebGL, cityBudget, isLowPowerDevice } from '../deviceProfile';
 import { perfStats } from '../perfStats';
 import { canRunFigmaShader, runFigmaShader } from './figmaShaderHost';
 
@@ -14,7 +14,13 @@ import styles from './ShaderBackground.module.scss';
 // static: no WebGPU and no WebGL, only the plain background colour
 type Mode = 'checking' | 'shader' | 'fallback' | 'static';
 
-const fallbackMode = (): Mode => (canUseWebGL() ? 'fallback' : 'static');
+function fallbackMode(): Mode {
+    if (canUseWebGL()) {
+        return 'fallback';
+    }
+    perfStats.backgroundReason = `${perfStats.backgroundReason}, and no usable WebGL`;
+    return 'static';
+}
 
 // The 3D city from the Figma design: the same shader file runs in Figma and here.
 // Scroll position drives the camera; browsers without WebGPU get the Three.js world instead.
@@ -76,8 +82,10 @@ function ShaderBackground() {
 
         let stop: (() => void) | null = null;
         let disposed = false;
-        const switchToFallback = () => {
+        // the reason shows in the ?perf overlay, to tell why a device gets the three.js world
+        const switchToFallback = (reason: string) => {
             if (!disposed) {
+                perfStats.backgroundReason = reason;
                 setMode(fallbackMode());
             }
         };
@@ -92,21 +100,15 @@ function ShaderBackground() {
                 maxPixelRatio: lowPower ? 1 : 1.25,
                 // Safari and Firefox may leave the vendor empty; a Mac then counts as Apple (older Intel Macs
                 // are caught by the frame rate check)
-                pixelsPerSecond: (adapter) =>
-                    cityPixelsPerSecond(
-                        adapter.vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : ''),
-                        lowPower,
-                    ),
+                budget: (vendor) =>
+                    cityBudget(vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : ''), lowPower),
                 // the city moves little once the camera has stopped; 30 fps halves the GPU load while reading
                 idleFps: 30,
                 idle: () => Math.abs(target - progress) < 0.0005,
-                onDeviceLost: switchToFallback,
-                // the GPU cannot even draw the city at the lowest resolution: keep the page smooth instead
-                onTooSlow: () => {
-                    if (!disposed) {
-                        setMode('static');
-                    }
-                },
+                onDeviceLost: () => switchToFallback('WebGPU device lost'),
+                // the GPU cannot even draw the city at the lowest resolution: the three.js world is lighter,
+                // and it falls back to the static background in turn when that is too slow as well
+                onTooSlow: () => switchToFallback('city too slow on this GPU'),
             },
         )
             .then((stopShader) => {
@@ -116,7 +118,7 @@ function ShaderBackground() {
                     stop = stopShader;
                 }
             })
-            .catch(switchToFallback);
+            .catch((error: unknown) => switchToFallback(`city failed to start: ${String(error)}`));
 
         return () => {
             disposed = true;
@@ -137,7 +139,12 @@ function ShaderBackground() {
         return (
             <BackgroundErrorBoundary fallback={plainBackground}>
                 <Suspense fallback={plainBackground}>
-                    <WorldBackground onTooSlow={() => setMode('static')} />
+                    <WorldBackground
+                        onTooSlow={() => {
+                            perfStats.backgroundReason = 'three.js world too slow on this GPU';
+                            setMode('static');
+                        }}
+                    />
                 </Suspense>
             </BackgroundErrorBoundary>
         );

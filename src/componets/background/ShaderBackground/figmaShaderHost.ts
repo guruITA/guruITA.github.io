@@ -2,6 +2,7 @@
 // The shader receives the same frame object Figma gives it: output, params, state, time and mouse.
 
 import { createAdaptiveResolution } from '../adaptiveResolution';
+import type { GpuBudget } from '../deviceProfile';
 import { createFrameLimiter } from '../frameLimiter';
 import { perfStats } from '../perfStats';
 
@@ -31,8 +32,8 @@ export interface ShaderOptions {
     // the render resolution moves between these pixel ratios, depending on how fast the GPU is
     maxPixelRatio?: number;
     minPixelRatio?: number;
-    // pixels per second this GPU can keep up with the shader (see adaptiveResolution)
-    pixelsPerSecond?: (adapter: GPUAdapterInfo) => number;
+    // what this GPU keeps up with the shader, given its vendor ('' when unknown; see adaptiveResolution)
+    budget?: (vendor: string) => GpuBudget;
     // even the lowest resolution is far too slow for this device
     onTooSlow?: () => void;
     // frame rate while idle() is true, to save battery when nothing moves
@@ -46,19 +47,32 @@ export interface ShaderOptions {
 const MAX_FPS = 60;
 const ADAPTER_TIMEOUT_MS = 3000;
 
+// Chrome 113-126 (and browsers built on it, such as Samsung Internet) have WebGPU but no adapter.info
+function adapterInfo(adapter: GPUAdapter | null): Partial<GPUAdapterInfo> & { isFallbackAdapter?: boolean } {
+    return (adapter as (GPUAdapter & { info?: GPUAdapterInfo }) | null)?.info ?? {};
+}
+
 export async function canRunFigmaShader(): Promise<boolean> {
     if (!('gpu' in navigator) || !navigator.gpu) {
+        perfStats.backgroundReason = 'no WebGPU in this browser';
         return false;
     }
     try {
         // some drivers never answer; treat that as no WebGPU
         const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ADAPTER_TIMEOUT_MS));
         const adapter = await Promise.race([navigator.gpu.requestAdapter(), timeout]);
+        if (adapter === null) {
+            perfStats.backgroundReason = 'no WebGPU adapter';
+            return false;
+        }
         // a fallback adapter runs on the CPU (no usable GPU); the city would crawl there
-        const fallback = (adapter?.info as (GPUAdapterInfo & { isFallbackAdapter?: boolean }) | undefined)
-            ?.isFallbackAdapter;
-        return adapter !== null && fallback !== true;
-    } catch {
+        if (adapterInfo(adapter).isFallbackAdapter === true) {
+            perfStats.backgroundReason = 'WebGPU runs on the CPU';
+            return false;
+        }
+        return true;
+    } catch (error) {
+        perfStats.backgroundReason = `WebGPU check failed: ${String(error)}`;
         return false;
     }
 }
@@ -71,7 +85,7 @@ export async function runFigmaShader(
     {
         maxPixelRatio = 1.25,
         minPixelRatio = 0.35,
-        pixelsPerSecond = () => 10_000_000,
+        budget = () => ({ pixelsPerSecond: 10_000_000, raiseAboveBudget: false }),
         idleFps = MAX_FPS,
         idle = () => false,
         onDeviceLost,
@@ -82,6 +96,8 @@ export async function runFigmaShader(
     if (!adapter) {
         throw new Error('No WebGPU adapter');
     }
+    // decided before the device exists, so a failure here leaves no device behind
+    const gpuBudget = budget(adapterInfo(adapter).vendor ?? '');
     const device = await adapter.requestDevice();
     device.lost.then((info) => {
         if (info.reason !== 'destroyed') {
@@ -122,7 +138,7 @@ export async function runFigmaShader(
     const resolution = createAdaptiveResolution({
         maxRatio,
         minRatio: Math.min(minPixelRatio, maxRatio),
-        pixelsPerSecond: pixelsPerSecond(adapter.info),
+        ...gpuBudget,
         fps: MAX_FPS,
         onTooSlow,
     });

@@ -29,13 +29,15 @@ const SLOW_WINDOWS = 2;
 // so it takes this many steps without effect to decide.
 const LOWERING_HELPED = 0.9;
 const LOWERINGS_TO_DECIDE = 2;
-// Hopeless: under 15 fps for this many windows in a row; a 30 fps cap never gets there
+// Hopeless: under 15 fps at the lowest resolution for this many windows in a row (4 s, longer than the
+// stalls of chunks and shader compiles loading); a 30 fps cap never gets there
 const HOPELESS_MS = 1000 / 15;
-const HOPELESS_WINDOWS = 4;
+const HOPELESS_WINDOWS = 8;
 // Room to spare: frames within a tenth of the target, for this many windows in a row
 const FAST_FACTOR = 1.1;
 const FAST_WINDOWS_TO_RAISE = 6;
-// After this long without slow frames, the budgeted resolution may be tried again
+// After this long without slow frames, the budgeted resolution may be tried again, and GPUs that
+// keep their speed under load may go above the budget
 const FAST_WINDOWS_TO_RESET_CEILING = 20;
 // pixel steps; 0.64 and 1.21 are 0.8 and 1.1 per side
 const LOWER_STEP = 0.64;
@@ -47,13 +49,23 @@ export interface AdaptiveResolutionOptions {
     minRatio: number;
     // pixels per second the GPU can keep up with this shader (see the measurements above)
     pixelsPerSecond: number;
+    // the budget is only the start: dedicated GPUs keep their speed under load, so after a long run of
+    // fast frames they may go higher. Integrated GPUs and phones must not, they looked fast until they slowed down.
+    raiseAboveBudget: boolean;
     // frame rate the budget is spread over, normally the highest the shader renders at
     fps: number;
     // even the lowest resolution is far too slow for this device
     onTooSlow?: () => void;
 }
 
-export function createAdaptiveResolution({ maxRatio, minRatio, pixelsPerSecond, fps, onTooSlow }: AdaptiveResolutionOptions) {
+export function createAdaptiveResolution({
+    maxRatio,
+    minRatio,
+    pixelsPerSecond,
+    raiseAboveBudget,
+    fps,
+    onTooSlow,
+}: AdaptiveResolutionOptions) {
     let cssArea = 1;
     // the budget per frame; the frame rate check never raises the resolution above it
     const budget = pixelsPerSecond / fps;
@@ -76,24 +88,28 @@ export function createAdaptiveResolution({ maxRatio, minRatio, pixelsPerSecond, 
     // a frame cap found by lowering the resolution without effect; 0 while none is known
     let paceMs = 0;
     // the resolution before the latest lowerings, to check whether they helped
-    let lowered: { from: number; averageMs: number; steps: number } | null = null;
+    // slowness is frame time over the target of that window: 1 is on time, at 30 fps idle as at 60 while scrolling
+    let lowered: { from: number; slowness: number; steps: number } | null = null;
 
     // pixels actually rendered: the budget kept between the lowest and highest ratio
     const effective = () => Math.min(maxRatio * maxRatio * cssArea, Math.max(minRatio * minRatio * cssArea, pixels));
     const ratio = () => Math.sqrt(effective() / cssArea);
     const atMinimum = () => pixels <= minRatio * minRatio * cssArea;
+    const atMaximum = () => pixels >= maxRatio * maxRatio * cssArea;
 
     const judge = (averageMs: number, frameTargetMs: number) => {
+        const slowness = averageMs / frameTargetMs;
         // a cap that went away (charger plugged in) shows as frames well under it
         if (paceMs > 0 && averageMs < paceMs * 0.8) {
             paceMs = 0;
         }
         if (lowered) {
-            const { from, averageMs: before, steps } = lowered;
+            const { from, slowness: before, steps } = lowered;
             lowered = null;
-            if (averageMs > before * LOWERING_HELPED) {
+            // under 15 fps it is not a cap; keep lowering towards the minimum instead
+            if (slowness > before * LOWERING_HELPED && averageMs <= HOPELESS_MS) {
                 if (steps < LOWERINGS_TO_DECIDE && !atMinimum()) {
-                    lowered = { from, averageMs: before, steps: steps + 1 };
+                    lowered = { from, slowness: before, steps: steps + 1 };
                     pixels = effective() * LOWER_STEP;
                     return;
                 }
@@ -103,7 +119,7 @@ export function createAdaptiveResolution({ maxRatio, minRatio, pixelsPerSecond, 
             }
         }
 
-        hopelessWindows = averageMs > HOPELESS_MS ? hopelessWindows + 1 : 0;
+        hopelessWindows = atMinimum() && averageMs > HOPELESS_MS ? hopelessWindows + 1 : 0;
         if (hopelessWindows >= HOPELESS_WINDOWS && !gaveUp) {
             gaveUp = true;
             onTooSlow?.();
@@ -116,7 +132,7 @@ export function createAdaptiveResolution({ maxRatio, minRatio, pixelsPerSecond, 
             slowWindows += 1;
             if (slowWindows >= SLOW_WINDOWS && !atMinimum()) {
                 slowWindows = 0;
-                lowered = { from: pixels, averageMs, steps: 1 };
+                lowered = { from: pixels, slowness, steps: 1 };
                 ceiling = effective() * 0.9;
                 pixels = effective() * LOWER_STEP;
             }
@@ -124,10 +140,16 @@ export function createAdaptiveResolution({ maxRatio, minRatio, pixelsPerSecond, 
         }
         slowWindows = 0;
         fastWindows = averageMs < targetMs * FAST_FACTOR ? fastWindows + 1 : 0;
-        if (fastWindows >= FAST_WINDOWS_TO_RESET_CEILING) {
-            ceiling = budget;
+        if (fastWindows === 0 || fastWindows % FAST_WINDOWS_TO_RAISE !== 0) {
+            return;
         }
-        if (fastWindows % FAST_WINDOWS_TO_RAISE === 0 && fastWindows > 0 && pixels < ceiling) {
+        if (fastWindows >= FAST_WINDOWS_TO_RESET_CEILING) {
+            ceiling = Math.max(ceiling, budget);
+            if (raiseAboveBudget && pixels >= ceiling && !atMaximum()) {
+                ceiling = effective() * RAISE_STEP;
+            }
+        }
+        if (pixels < ceiling) {
             pixels = Math.min(ceiling, effective() * RAISE_STEP);
         }
     };

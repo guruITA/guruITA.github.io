@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { createAdaptiveResolution } from '../adaptiveResolution';
-import { cityPixelsPerSecond, isLowPowerDevice, webglGpuVendor } from '../deviceProfile';
+import { cityBudget, isLowPowerDevice, webglGpuVendor } from '../deviceProfile';
 import { createFrameLimiter } from '../frameLimiter';
 import { perfStats } from '../perfStats';
 import styles from './WorldBackground.module.scss';
@@ -561,16 +561,19 @@ function WorldBackground({ onTooSlow }: WorldBackgroundProps) {
         });
         // the resolution follows what the GPU keeps up (see adaptiveResolution)
         const maxRatio = Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5);
+        const budget = cityBudget(webglGpuVendor(), lowPower);
         const resolution = createAdaptiveResolution({
             maxRatio,
             minRatio: Math.min(0.5, maxRatio),
-            pixelsPerSecond: cityPixelsPerSecond(webglGpuVendor(), lowPower) * WORLD_COST_FACTOR,
+            pixelsPerSecond: budget.pixelsPerSecond * WORLD_COST_FACTOR,
+            raiseAboveBudget: budget.raiseAboveBudget,
             fps: 60,
             onTooSlow: () => onTooSlowRef.current?.(),
         });
         resolution.setCssSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(resolution.ratio);
         renderer.setSize(container.clientWidth, container.clientHeight);
+        perfStats.backgroundRatio = resolution.ratio;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.1;
         renderer.shadowMap.enabled = !lowPower;

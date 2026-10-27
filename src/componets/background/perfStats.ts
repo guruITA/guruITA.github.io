@@ -2,6 +2,8 @@
 export const perfStats = {
     // checking | shader | fallback | static, see ShaderBackground
     backgroundMode: 'checking',
-    // pixel ratio the city shader currently renders at
+    // pixel ratio the background currently renders at
     backgroundRatio: 0,
+    // why the background is not the WebGPU city, when it is not
+    backgroundReason: '',
 };

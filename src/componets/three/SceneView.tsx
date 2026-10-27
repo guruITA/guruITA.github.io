@@ -2,9 +2,8 @@ import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'rea
 import { useThree } from '@react-three/fiber';
 import { PerspectiveCamera, View } from '@react-three/drei';
 import BackgroundErrorBoundary from '../background/BackgroundErrorBoundary';
-import { FrameDriver } from './SceneCanvas';
 import { reducedMotion } from './sceneQuality';
-import { requestSceneLayer } from './sceneLayerStore';
+import { requestSceneLayer, startSceneAnimation } from './sceneLayerStore';
 
 interface SceneViewProps {
     inView: boolean;
@@ -47,13 +46,17 @@ function SceneView({ inView, camera, children }: SceneViewProps) {
 
     useEffect(() => requestSceneLayer(), []);
 
+    // the shared canvas runs one frame driver for all scenes (SceneLayer); one per scene would each
+    // keep their own schedule and together draw the canvas more often than sceneFps
+    const animating = inView && shown && !reducedMotion;
+    useEffect(() => (animating ? startSceneAnimation() : undefined), [animating]);
+
     return (
         <View ref={ref} visible={shown} style={{ width: '100%', height: '100%' }}>
             <PerspectiveCamera makeDefault position={camera.position} fov={camera.fov} />
             <DrawOnChange value={shown} />
             {/* all scenes share one canvas; one that fails should not take the others down */}
             <BackgroundErrorBoundary fallback={null}>
-                <FrameDriver running={inView && !reducedMotion} />
                 {children}
             </BackgroundErrorBoundary>
         </View>
