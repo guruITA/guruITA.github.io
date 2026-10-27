@@ -1,0 +1,22 @@
+.overlay {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 1000;
+
+  max-width: calc(100vw - 16px);
+  padding: 6px 8px;
+
+  border-radius: 6px;
+  background: rgb(0 0 0 / 75%);
+  color: #7fffb0;
+
+  font: 11px/1.4 ui-monospace, monospace;
+  pointer-events: none;
+}
+
+.gpu {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

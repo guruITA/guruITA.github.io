@@ -10,7 +10,7 @@ import {
     type Mesh,
     type MeshBasicMaterial,
 } from 'three';
-import SceneCanvas from './SceneCanvas';
+import SceneView from './SceneView';
 import { useActiveLevel } from './sceneHooks';
 import { idleMotion, lowPower, themeColor } from './sceneQuality';
 
@@ -357,12 +357,12 @@ const PREVIEWS = [Network, Parcel, Transmitter];
 function ProjectPreviewScene({ inView, variant, active }: PreviewProps & { inView: boolean; variant: number }) {
     const Preview = PREVIEWS[variant % PREVIEWS.length];
     return (
-        <SceneCanvas inView={inView} camera={{ position: [0, 0.3, 5], fov: 35 }}>
+        <SceneView inView={inView} camera={{ position: [0, 0.3, 5], fov: 35 }}>
             <ambientLight intensity={0.55} />
             <directionalLight position={[2, 4, 5]} intensity={2.4} />
             <pointLight position={[-3, -1, 2]} intensity={10} color="#22d3ee" />
             <Preview active={active} />
-        </SceneCanvas>
+        </SceneView>
     );
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type { Group } from 'three';
-import SceneCanvas from './SceneCanvas';
+import SceneView from './SceneView';
 import { approach, idleMotion, lowPower, themeColor } from './sceneQuality';
 
 const RINGS = [
@@ -75,12 +75,12 @@ function Gyroscope() {
 
 function AboutRingsScene({ inView }: { inView: boolean }) {
     return (
-        <SceneCanvas inView={inView} camera={{ position: [0, 0, 5], fov: 40 }}>
+        <SceneView inView={inView} camera={{ position: [0, 0, 5], fov: 40 }}>
             <ambientLight intensity={0.6} />
             <directionalLight position={[3, 4, 5]} intensity={2.4} />
             <pointLight position={[0, 0, 0]} intensity={4} color="#22d3ee" />
             <Gyroscope />
-        </SceneCanvas>
+        </SceneView>
     );
 }
 

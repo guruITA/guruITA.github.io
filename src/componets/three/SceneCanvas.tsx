@@ -4,7 +4,7 @@ import { createFrameLimiter } from '../background/frameLimiter';
 import { lowPower, reducedMotion, sceneDpr, sceneFps } from './sceneQuality';
 
 // Requests frames at the device's frame rate while the scene is in view, and none otherwise
-function FrameDriver({ running }: { running: boolean }) {
+export function FrameDriver({ running }: { running: boolean }) {
     const invalidate = useThree((state) => state.invalidate);
 
     useEffect(() => {
