@@ -232,13 +232,13 @@ function Home() {
                         <span>
                             <strong>Full-stack developer</strong>
                             Based in the Netherlands
+                            <span className={styles.availability}>
+                                <span aria-hidden="true" /> Open to opportunities
+                            </span>
                         </span>
                     </div>
 
                     <div className={styles.heroContent}>
-                        <p className={styles.availability}>
-                            <span aria-hidden="true" /> Open to opportunities
-                        </p>
                         <h1>Hi, I&apos;m Gurpreet.</h1>
                         <h2>
                             I build thoughtful digital products from
