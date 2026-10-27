@@ -2,7 +2,7 @@
 
 Personal portfolio of Gurpreet Singh — Software Engineering student and full-stack developer.
 
-Live at [guruita.github.io](https://guruita.github.io).
+Live at [guruita.dev](https://guruita.dev).
 
 ## Stack
 
