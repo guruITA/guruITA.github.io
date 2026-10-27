@@ -1,7 +1,9 @@
 // Runs a Figma shader (its unchanged main.ts from the Figma library) on a canvas.
 // The shader receives the same frame object Figma gives it: output, params, state, time and mouse.
 
+import { createAdaptiveResolution } from '../adaptiveResolution';
 import { createFrameLimiter } from '../frameLimiter';
+import { perfStats } from '../perfStats';
 
 type ShaderParams = Record<string, unknown>;
 
@@ -26,7 +28,13 @@ export interface ShaderModule {
 export type LiveParams = Record<string, () => unknown>;
 
 export interface ShaderOptions {
+    // the render resolution moves between these pixel ratios, depending on how fast the GPU is
     maxPixelRatio?: number;
+    minPixelRatio?: number;
+    // pixels per second this GPU can keep up with the shader (see adaptiveResolution)
+    pixelsPerSecond?: (adapter: GPUAdapterInfo) => number;
+    // even the lowest resolution is far too slow for this device
+    onTooSlow?: () => void;
     // frame rate while idle() is true, to save battery when nothing moves
     idleFps?: number;
     idle?: () => boolean;
@@ -45,7 +53,11 @@ export async function canRunFigmaShader(): Promise<boolean> {
     try {
         // some drivers never answer; treat that as no WebGPU
         const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ADAPTER_TIMEOUT_MS));
-        return (await Promise.race([navigator.gpu.requestAdapter(), timeout])) !== null;
+        const adapter = await Promise.race([navigator.gpu.requestAdapter(), timeout]);
+        // a fallback adapter runs on the CPU (no usable GPU); the city would crawl there
+        const fallback = (adapter?.info as (GPUAdapterInfo & { isFallbackAdapter?: boolean }) | undefined)
+            ?.isFallbackAdapter;
+        return adapter !== null && fallback !== true;
     } catch {
         return false;
     }
@@ -56,7 +68,15 @@ export async function runFigmaShader(
     canvas: HTMLCanvasElement,
     shader: ShaderModule,
     live: LiveParams,
-    { maxPixelRatio = 1.25, idleFps = MAX_FPS, idle = () => false, onDeviceLost }: ShaderOptions = {},
+    {
+        maxPixelRatio = 1.25,
+        minPixelRatio = 0.35,
+        pixelsPerSecond = () => 10_000_000,
+        idleFps = MAX_FPS,
+        idle = () => false,
+        onDeviceLost,
+        onTooSlow,
+    }: ShaderOptions = {},
 ): Promise<() => void> {
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) {
@@ -98,10 +118,21 @@ export async function runFigmaShader(
         frame.mousePosition = { x: (event.clientX - rect.left) * scale, y: (event.clientY - rect.top) * scale };
     };
 
-    const handleResize = () => {
-        const ratio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
-        const width = Math.max(1, Math.round(canvas.clientWidth * ratio));
-        const height = Math.max(1, Math.round(canvas.clientHeight * ratio));
+    const maxRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
+    const resolution = createAdaptiveResolution({
+        maxRatio,
+        minRatio: Math.min(minPixelRatio, maxRatio),
+        pixelsPerSecond: pixelsPerSecond(adapter.info),
+        fps: MAX_FPS,
+        onTooSlow,
+    });
+
+    // the CSS size is read on resize only; reading it every frame could force an extra layout
+    let cssWidth = 0;
+    let cssHeight = 0;
+    const applySize = () => {
+        const width = Math.max(1, Math.round(cssWidth * resolution.ratio));
+        const height = Math.max(1, Math.round(cssHeight * resolution.ratio));
         // mobile toolbars fire resize while scrolling; skip when the size did not change
         if (width === canvas.width && height === canvas.height) {
             return;
@@ -110,6 +141,12 @@ export async function runFigmaShader(
         canvas.height = height;
         frame.output.width = width;
         frame.output.height = height;
+    };
+    const handleResize = () => {
+        cssWidth = canvas.clientWidth;
+        cssHeight = canvas.clientHeight;
+        resolution.setCssSize(cssWidth, cssHeight);
+        applySize();
     };
 
     handleResize();
@@ -131,9 +168,14 @@ export async function runFigmaShader(
     const shouldRender = createFrameLimiter();
     const tick = (now: number) => {
         animationFrameId = requestAnimationFrame(tick);
-        if (!shouldRender(now, idle() ? idleFps : MAX_FPS)) {
+        const targetFps = idle() ? idleFps : MAX_FPS;
+        if (!shouldRender(now, targetFps)) {
             return;
         }
+        resolution.sample(now, targetFps);
+        // a no-op unless the resolution changed
+        applySize();
+        perfStats.backgroundRatio = resolution.ratio;
         frame.deltaTime = now - last;
         frame.time = now - start;
         last = now;

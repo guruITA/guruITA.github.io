@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { ExtrudeGeometry, Shape, type Group, type Mesh, type MeshStandardMaterial } from 'three';
-import SceneCanvas from './SceneCanvas';
+import SceneView from './SceneView';
 import { useActiveLevel } from './sceneHooks';
 import { idleMotion, lowPower, themeColor } from './sceneQuality';
 
@@ -216,12 +216,12 @@ const ICONS = [BrowserWindows, ServerStack, Gear, TorusKnot];
 function SkillIconScene({ inView, variant, active }: IconProps & { inView: boolean; variant: number }) {
     const Icon = ICONS[variant % ICONS.length];
     return (
-        <SceneCanvas inView={inView} camera={{ position: [0, 0, 4], fov: 35 }}>
+        <SceneView inView={inView} camera={{ position: [0, 0, 4], fov: 35 }}>
             <ambientLight intensity={0.55} />
             <directionalLight position={[2, 3, 4]} intensity={2.4} />
             <pointLight position={[-3, -1, 2]} intensity={8} color="#22d3ee" />
             <Icon active={active} />
-        </SceneCanvas>
+        </SceneView>
     );
 }
 

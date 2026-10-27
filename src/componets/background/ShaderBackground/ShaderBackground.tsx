@@ -2,7 +2,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 
 import * as cityShader from '../../../../shaders/city-shader.ts?figma-shader';
 import BackgroundErrorBoundary from '../BackgroundErrorBoundary';
-import { canUseWebGL, isLowPowerDevice } from '../deviceProfile';
+import { canUseWebGL, cityPixelsPerSecond, isLowPowerDevice } from '../deviceProfile';
+import { perfStats } from '../perfStats';
 import { canRunFigmaShader, runFigmaShader } from './figmaShaderHost';
 
 // Three.js only downloads for browsers that need the fallback
@@ -35,6 +36,7 @@ function ShaderBackground() {
 
     // without WebGPU or WebGL the page is usually drawn in software, so index.scss pauses the looping animations
     useEffect(() => {
+        perfStats.backgroundMode = mode;
         if (mode !== 'static') {
             return;
         }
@@ -88,10 +90,23 @@ function ShaderBackground() {
             },
             {
                 maxPixelRatio: lowPower ? 1 : 1.25,
-                // weaker devices drop to 30 fps once the camera has stopped moving
-                idleFps: lowPower ? 30 : 60,
+                // Safari and Firefox may leave the vendor empty; a Mac then counts as Apple (older Intel Macs
+                // are caught by the frame rate check)
+                pixelsPerSecond: (adapter) =>
+                    cityPixelsPerSecond(
+                        adapter.vendor || (/Macintosh/.test(navigator.userAgent) ? 'apple' : ''),
+                        lowPower,
+                    ),
+                // the city moves little once the camera has stopped; 30 fps halves the GPU load while reading
+                idleFps: 30,
                 idle: () => Math.abs(target - progress) < 0.0005,
                 onDeviceLost: switchToFallback,
+                // the GPU cannot even draw the city at the lowest resolution: keep the page smooth instead
+                onTooSlow: () => {
+                    if (!disposed) {
+                        setMode('static');
+                    }
+                },
             },
         )
             .then((stopShader) => {
@@ -122,7 +137,7 @@ function ShaderBackground() {
         return (
             <BackgroundErrorBoundary fallback={plainBackground}>
                 <Suspense fallback={plainBackground}>
-                    <WorldBackground />
+                    <WorldBackground onTooSlow={() => setMode('static')} />
                 </Suspense>
             </BackgroundErrorBoundary>
         );

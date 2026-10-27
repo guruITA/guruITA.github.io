@@ -3,8 +3,10 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { isLowPowerDevice } from '../deviceProfile';
+import { createAdaptiveResolution } from '../adaptiveResolution';
+import { cityPixelsPerSecond, isLowPowerDevice, webglGpuVendor } from '../deviceProfile';
 import { createFrameLimiter } from '../frameLimiter';
+import { perfStats } from '../perfStats';
 import styles from './WorldBackground.module.scss';
 
 type GradientStop = {
@@ -504,8 +506,22 @@ function buildParticleField(disposables: Disposable[]) {
     return new THREE.Points(geometry, material);
 }
 
-function WorldBackground() {
+// Geometry costs less per pixel than the city's ray marching: an Intel UHD 630 kept this scene
+// (with bloom and shadows) at 45 fps at 1440x900, about 58 million pixels per second
+const WORLD_COST_FACTOR = 4;
+
+interface WorldBackgroundProps {
+    // even the lowest resolution is far too slow for this device
+    onTooSlow?: () => void;
+}
+
+function WorldBackground({ onTooSlow }: WorldBackgroundProps) {
     const containerRef = useRef<HTMLDivElement>(null);
+    // read from the render loop, which starts once
+    const onTooSlowRef = useRef(onTooSlow);
+    useEffect(() => {
+        onTooSlowRef.current = onTooSlow;
+    }, [onTooSlow]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -543,7 +559,17 @@ function WorldBackground() {
             alpha: true,
             powerPreference: lowPower ? 'low-power' : 'high-performance',
         });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5));
+        // the resolution follows what the GPU keeps up (see adaptiveResolution)
+        const maxRatio = Math.min(window.devicePixelRatio, lowPower ? 1 : 1.5);
+        const resolution = createAdaptiveResolution({
+            maxRatio,
+            minRatio: Math.min(0.5, maxRatio),
+            pixelsPerSecond: cityPixelsPerSecond(webglGpuVendor(), lowPower) * WORLD_COST_FACTOR,
+            fps: 60,
+            onTooSlow: () => onTooSlowRef.current?.(),
+        });
+        resolution.setCssSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(resolution.ratio);
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.1;
@@ -670,14 +696,29 @@ function WorldBackground() {
             }
         };
 
+        // three.js resizes its buffers on setPixelRatio, so only when the ratio really changed
+        const applyResolution = () => {
+            const ratio = resolution.ratio;
+            if (Math.abs(renderer.getPixelRatio() - ratio) < 0.01) {
+                return;
+            }
+            renderer.setPixelRatio(ratio);
+            composer?.setPixelRatio(ratio);
+            perfStats.backgroundRatio = ratio;
+        };
+
         // 120 and 144 Hz screens would otherwise render the scene twice as often
         const shouldRender = createFrameLimiter();
         const animate = (now = performance.now()) => {
             animationFrameId = requestAnimationFrame(animate);
             const idle = Math.abs(targetProgressRef.current - smoothedProgress) < 0.0005;
-            if (!shouldRender(now, lowPower && idle ? 30 : 60)) {
+            // 30 fps once the camera has stopped, which halves the GPU load while reading
+            const targetFps = idle ? 30 : 60;
+            if (!shouldRender(now, targetFps)) {
                 return;
             }
+            resolution.sample(now, targetFps);
+            applyResolution();
 
             timer.update();
             const delta = timer.getDelta();
@@ -720,6 +761,8 @@ function WorldBackground() {
         const handleResize = () => {
             const width = container.clientWidth;
             const height = container.clientHeight;
+            resolution.setCssSize(width, height);
+            applyResolution();
 
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
