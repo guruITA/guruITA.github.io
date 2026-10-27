@@ -65,8 +65,10 @@ export async function canRunFigmaShader(): Promise<boolean> {
             perfStats.backgroundReason = 'no WebGPU adapter';
             return false;
         }
-        // a fallback adapter runs on the CPU (no usable GPU); the city would crawl there
-        if (adapterInfo(adapter).isFallbackAdapter === true) {
+        // a fallback adapter runs on the CPU (no usable GPU); the city would crawl there. Newer browsers
+        // report it in adapter.info, older ones (without adapter.info) on the adapter itself
+        const onAdapter = (adapter as GPUAdapter & { isFallbackAdapter?: boolean }).isFallbackAdapter;
+        if (onAdapter === true || adapterInfo(adapter).isFallbackAdapter === true) {
             perfStats.backgroundReason = 'WebGPU runs on the CPU';
             return false;
         }
