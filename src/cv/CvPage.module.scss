@@ -229,6 +229,22 @@
   }
 }
 
+// on narrow columns some titles leave room for the date and some do not; always put it underneath
+// (screen only, so the printed PDF keeps its layout)
+@media screen and (max-width: 900px) {
+  .entryHead {
+    flex-direction: column;
+  }
+}
+
+// very narrow screens (small or folding phones): photo above the name, so the name gets the full width
+@media screen and (max-width: 350px) {
+  .identity {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 720px) {
   .page {
     padding: 1rem 1rem 3rem;

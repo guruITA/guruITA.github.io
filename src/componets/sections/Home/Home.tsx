@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState, type PointerEvent } from 'react';
+import { lazy, useEffect, useState, type PointerEvent, type ReactNode } from 'react';
 import profileImage from '../../../assets/profile.webp';
 import ContactForm from '../../forms/ContactForm/ContactForm';
 import SceneSlot from '../../three/SceneSlot';
@@ -78,7 +78,7 @@ function SectionHeading({
     description,
 }: {
     eyebrow: string;
-    title: string;
+    title: ReactNode;
     description: string;
 }) {
     return (
@@ -124,7 +124,7 @@ function ProjectCard({ project, index }: { project: (typeof projects)[number]; i
             <SceneSlot className={styles.projectScene}>
                 {(inView) => <ProjectPreviewScene inView={inView} variant={index} active={active} />}
             </SceneSlot>
-            <a href="#contact">
+            <a href="#contact" aria-label={`View case study: ${project.title}`}>
                 View case study <span aria-hidden="true">→</span>
             </a>
         </article>
@@ -342,7 +342,11 @@ function Home() {
                 <div className={styles.container}>
                     <SectionHeading
                         eyebrow="Capabilities"
-                        title="A balanced full-stack toolkit"
+                        title={
+                            <>
+                                A balanced <span className={styles.noWrap}>full-stack</span> toolkit
+                            </>
+                        }
                         description="Tools change. Strong fundamentals, thoughtful architecture and the ability to learn remain central."
                     />
 

@@ -45,9 +45,10 @@
   gap: 0.75rem;
   list-style: none;
 
+  // 44px: big enough to tap on a phone
   a {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -66,8 +67,8 @@
   }
 
   svg {
-    width: 1.1rem;
-    height: 1.1rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }
 
@@ -76,8 +77,13 @@
     width: min(100% - 2rem, 1200px);
     padding: 1.5rem 0;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
+    text-align: center;
+  }
+
+  .brand {
+    align-items: center;
   }
 }
 
