@@ -36,6 +36,9 @@ const HOPELESS_WINDOWS = 8;
 // Too slow for good: slow (see SLOW_FACTOR) at the lowest resolution for this many windows (8 s); a lighter
 // background then serves the page better than one that keeps it under 48 fps
 const SLOW_AT_MINIMUM_WINDOWS = 16;
+// Slow at the lowest resolution can still be a frame cap, which is only told apart by drawing fewer
+// pixels: one trial window at this share of the lowest pixel count (0.7 per side) answers it
+const TRIAL_SCALE = 0.5;
 // Room to spare: frames within a tenth of the target, for this many windows in a row
 const FAST_FACTOR = 1.1;
 const FAST_WINDOWS_TO_RAISE = 6;
@@ -98,9 +101,15 @@ export function createAdaptiveResolution({
     // the fewest pixels per frame that were ever too slow; going above the budget stays clear of it,
     // so a strong GPU does not keep retrying a resolution that stuttered
     let slowestKnown = Infinity;
+    // a trial below the lowest resolution, to tell a frame cap from a GPU that is too slow there;
+    // tried once until frames are fast again
+    let trial: { from: number; slowness: number; targetMs: number } | null = null;
+    let trialDone = false;
+    let floorScale = 1;
 
     // pixels actually rendered: the budget kept between the lowest and highest ratio
-    const effective = () => Math.min(maxRatio * maxRatio * cssArea, Math.max(minRatio * minRatio * cssArea, pixels));
+    const effective = () =>
+        Math.min(maxRatio * maxRatio * cssArea, Math.max(minRatio * minRatio * cssArea * floorScale, pixels));
     const ratio = () => Math.sqrt(effective() / cssArea);
     // within a fifth of the fewest pixels counts as the minimum: a smaller step down changes too little
     // to tell whether it helped, which would read as a frame cap
@@ -115,7 +124,25 @@ export function createAdaptiveResolution({
         }
         // only a window with the same target frame rate tells whether the lowering helped: when scrolling
         // stops (60 -> 30 fps) a capped device looks on time without being any faster
-        if (lowered && Math.abs(frameTargetMs - lowered.targetMs) <= lowered.targetMs * 0.1) {
+        const sameTarget = (targetMs: number) => Math.abs(frameTargetMs - targetMs) <= targetMs * 0.1;
+        if (trial) {
+            if (!sameTarget(trial.targetMs)) {
+                return;
+            }
+            const { from, slowness: before } = trial;
+            trial = null;
+            trialDone = true;
+            floorScale = 1;
+            pixels = from;
+            // fewer pixels did not make frames faster: a cap, so frames are judged against it from now on
+            if (slowness > before * LOWERING_HELPED && averageMs <= HOPELESS_MS) {
+                paceMs = averageMs;
+                slowAtMinimumWindows = 0;
+            }
+            // the trial window was drawn at another resolution; it says nothing more about this one
+            return;
+        }
+        if (lowered && sameTarget(lowered.targetMs)) {
             const { from, slowness: before, targetMs: loweredTargetMs, steps, slowestBefore } = lowered;
             lowered = null;
             // under 15 fps it is not a cap; keep lowering towards the minimum instead
@@ -146,6 +173,14 @@ export function createAdaptiveResolution({
             fastWindows = 0;
             slowWindows += 1;
             // one lowering at a time: the previous one is judged first
+            // at the lowest resolution, one trial below it first, to tell a frame cap from a slow GPU
+            if (slowWindows >= SLOW_WINDOWS && atMinimum() && !lowered && !trialDone) {
+                slowWindows = 0;
+                trial = { from: pixels, slowness, targetMs: frameTargetMs };
+                floorScale = TRIAL_SCALE;
+                pixels = minRatio * minRatio * cssArea * TRIAL_SCALE;
+                return;
+            }
             if (slowWindows >= SLOW_WINDOWS && !atMinimum() && !lowered) {
                 slowWindows = 0;
                 lowered = { from: pixels, slowness, targetMs: frameTargetMs, steps: 1, slowestBefore: slowestKnown };
@@ -157,6 +192,9 @@ export function createAdaptiveResolution({
         }
         slowWindows = 0;
         fastWindows = averageMs < targetMs * FAST_FACTOR ? fastWindows + 1 : 0;
+        if (fastWindows > 0) {
+            trialDone = false;
+        }
         if (fastWindows === 0 || fastWindows % FAST_WINDOWS_TO_RAISE !== 0) {
             return;
         }
