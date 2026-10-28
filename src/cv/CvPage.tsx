@@ -2,12 +2,41 @@ import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 're
 import photo from '../assets/cv-photo.webp';
 import Footer from '../componets/layout/Footer/Footer';
 import Navbar from '../componets/layout/Navbar/Navbar';
-import { cv, type CvEntry } from './cvData';
+import { useLanguage, useTexts } from '../i18n/language';
+import { cv as cvTexts, type CvEntry } from './cvData';
 import styles from './CvPage.module.scss';
 
-// written next to the page by scripts/build-cv-pdf.mjs during `npm run build`
-const PDF_HREF = '/cv/gurpreet-singh-cv.pdf';
-const PDF_NAME = 'Gurpreet-Singh-CV.pdf';
+// written next to the page by scripts/build-cv-pdf.mjs during `npm run build`, one per language
+// (same paths as CV_PDF_PATHS in scripts/cv-pdf.mjs)
+const PDF = {
+    en: { href: '/cv/gurpreet-singh-cv.pdf', name: 'Gurpreet-Singh-CV.pdf' },
+    nl: { href: '/cv/gurpreet-singh-cv-nl.pdf', name: 'Gurpreet-Singh-CV-NL.pdf' },
+};
+
+const text = {
+    en: {
+        download: { idle: 'Download PDF', busy: 'Preparing PDF…', done: 'Downloaded ✓' },
+        photoAlt: (name: string) => `Photo of ${name}`,
+        education: 'Education',
+        internships: 'Internships',
+        experience: 'Work experience',
+        personal: 'Personal details',
+        skills: 'Skills',
+        languages: 'Spoken languages',
+        interests: 'Interests',
+    },
+    nl: {
+        download: { idle: 'Download PDF', busy: 'PDF wordt klaargemaakt…', done: 'Gedownload ✓' },
+        photoAlt: (name: string) => `Foto van ${name}`,
+        education: 'Opleiding',
+        internships: 'Stages',
+        experience: 'Werkervaring',
+        personal: 'Persoonlijke gegevens',
+        skills: 'Vaardigheden',
+        languages: 'Talen',
+        interests: 'Interesses',
+    },
+};
 
 // How long the button says the CV was downloaded and ignores clicks: browsers take a moment
 // before they show a started download, and visitors who see nothing happen click again
@@ -20,6 +49,8 @@ type DownloadState = 'idle' | 'busy' | 'done';
 // between; if fetching fails it falls back to the plain link.
 function DownloadButton() {
     const [state, setState] = useState<DownloadState>('idle');
+    const { href, name } = PDF[useLanguage()];
+    const t = useTexts(text);
     const resetTimer = useRef<number | undefined>(undefined);
 
     useEffect(() => () => window.clearTimeout(resetTimer.current), []);
@@ -31,32 +62,32 @@ function DownloadButton() {
         }
         setState('busy');
         try {
-            const response = await fetch(PDF_HREF);
+            const response = await fetch(href);
             // an HTML page here means there is no PDF (it would be saved as a broken .pdf)
             if (!response.ok || !response.headers.get('content-type')?.includes('pdf')) {
-                throw new Error(`no PDF at ${PDF_HREF}`);
+                throw new Error(`no PDF at ${href}`);
             }
             const url = URL.createObjectURL(await response.blob());
             const link = document.createElement('a');
             link.href = url;
-            link.download = PDF_NAME;
+            link.download = name;
             link.click();
             // some browsers read the file after click() returns
             window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
         } catch {
-            window.location.href = PDF_HREF;
+            window.location.href = href;
         }
         setState('done');
         resetTimer.current = window.setTimeout(() => setState('idle'), DONE_MS);
     };
 
-    const label = { idle: 'Download PDF', busy: 'Preparing PDF…', done: 'Downloaded ✓' }[state];
+    const label = t.download[state];
 
     return (
         <a
             className={styles.download}
-            href={PDF_HREF}
-            download={PDF_NAME}
+            href={href}
+            download={name}
             onClick={download}
             aria-busy={state === 'busy'}
             aria-disabled={state !== 'idle'}
@@ -109,6 +140,9 @@ function Tags({ items }: { items: string[] }) {
 }
 
 function CvPage() {
+    const cv = useTexts(cvTexts);
+    const t = useTexts(text);
+
     return (
         <>
             <Navbar />
@@ -122,7 +156,7 @@ function CvPage() {
                 <main className={styles.sheet}>
                     <header className={styles.header}>
                         <div className={styles.identity}>
-                            <img className={styles.photo} src={photo} alt={`Photo of ${cv.name}`} width="320" height="320" />
+                            <img className={styles.photo} src={photo} alt={t.photoAlt(cv.name)} width="320" height="320" />
                             <div>
                                 <h1>{cv.name}</h1>
                                 <p className={styles.role}>{cv.role}</p>
@@ -145,19 +179,19 @@ function CvPage() {
 
                     <div className={styles.columns}>
                         <div className={styles.mainColumn}>
-                            <Section title="Education">
+                            <Section title={t.education}>
                                 <Entries entries={cv.education} />
                             </Section>
-                            <Section title="Internships">
+                            <Section title={t.internships}>
                                 <Entries entries={cv.internships} />
                             </Section>
-                            <Section title="Work experience">
+                            <Section title={t.experience}>
                                 <Entries entries={cv.experience} />
                             </Section>
                         </div>
 
                         <aside className={styles.sideColumn}>
-                            <Section title="Personal details">
+                            <Section title={t.personal}>
                                 <dl className={styles.facts}>
                                     {cv.personal.map((fact) => (
                                         <div key={fact.label}>
@@ -167,7 +201,7 @@ function CvPage() {
                                     ))}
                                 </dl>
                             </Section>
-                            <Section title="Skills">
+                            <Section title={t.skills}>
                                 {cv.skills.map((skill) => (
                                     <div key={skill.group} className={styles.skillGroup}>
                                         <h3>{skill.group}</h3>
@@ -175,10 +209,10 @@ function CvPage() {
                                     </div>
                                 ))}
                             </Section>
-                            <Section title="Spoken languages">
+                            <Section title={t.languages}>
                                 <Tags items={cv.languages} />
                             </Section>
-                            <Section title="Interests">
+                            <Section title={t.interests}>
                                 <Tags items={cv.interests} />
                             </Section>
                         </aside>

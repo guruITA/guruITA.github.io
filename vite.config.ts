@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
-import { CV_PDF_PATH, renderCvPdf } from './scripts/cv-pdf.mjs'
+import { CV_PDF_PATHS, renderCvPdf } from './scripts/cv-pdf.mjs'
 import { figmaShaderToModule } from './scripts/figma-shader-module.mjs'
 
 // The CV PDF is printed from the /cv/ page. The build writes it to dist/ (scripts/build-cv-pdf.mjs);
@@ -13,20 +13,22 @@ function cvPdfInDev(): Plugin {
     name: 'cv-pdf-in-dev',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use(CV_PDF_PATH, async (_req, res, next) => {
-        try {
-          const baseUrl = server.resolvedUrls?.local[0]
-          if (!baseUrl) {
-            throw new Error('dev server has no local URL yet')
+      for (const [language, path] of Object.entries(CV_PDF_PATHS) as ['en' | 'nl', string][]) {
+        server.middlewares.use(path, async (_req, res, next) => {
+          try {
+            const baseUrl = server.resolvedUrls?.local[0]
+            if (!baseUrl) {
+              throw new Error('dev server has no local URL yet')
+            }
+            const pdf = await renderCvPdf(baseUrl, language)
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Cache-Control', 'no-store')
+            res.end(pdf)
+          } catch (error) {
+            next(error)
           }
-          const pdf = await renderCvPdf(baseUrl)
-          res.setHeader('Content-Type', 'application/pdf')
-          res.setHeader('Cache-Control', 'no-store')
-          res.end(pdf)
-        } catch (error) {
-          next(error)
-        }
-      })
+        })
+      }
     },
   }
 }

@@ -1,2 +1,2 @@
-export const CV_PDF_PATH: string;
-export function renderCvPdf(baseUrl: string): Promise<Buffer>;
+export const CV_PDF_PATHS: Record<'en' | 'nl', string>;
+export function renderCvPdf(baseUrl: string, language: 'en' | 'nl'): Promise<Buffer>;

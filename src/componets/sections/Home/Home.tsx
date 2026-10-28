@@ -2,75 +2,15 @@ import { lazy, useEffect, useState, type PointerEvent, type ReactNode } from 're
 import profileImage from '../../../assets/profile.webp';
 import ContactForm from '../../forms/ContactForm/ContactForm';
 import SceneSlot from '../../three/SceneSlot';
+import { useTexts } from '../../../i18n/language';
 import styles from './Home.module.scss';
+import { homeText, type Project, type Skill } from './homeText';
 
 // three.js and the scenes load only when the first scene nears the screen
 const HeroOrbScene = lazy(() => import('../../three/HeroOrbScene'));
 const AboutRingsScene = lazy(() => import('../../three/AboutRingsScene'));
 const ProjectPreviewScene = lazy(() => import('../../three/ProjectPreviewScene'));
 const SkillIconScene = lazy(() => import('../../three/SkillIconScene'));
-
-const valueProps = [
-    {
-        eyebrow: 'Product mindset',
-        title: 'From idea to useful outcome',
-    },
-    {
-        eyebrow: 'Full-stack',
-        title: 'Frontend, backend and delivery',
-    },
-    {
-        eyebrow: 'Always learning',
-        title: 'Curious, reflective and improving',
-    },
-];
-
-const projects = [
-    {
-        number: '01',
-        title: 'Connect Nine',
-        description:
-            'A youth-focused digital platform shaped around opportunities and community.',
-        tags: ['Product', 'Web'],
-    },
-    {
-        number: '02',
-        title: 'Nidar Store',
-        description:
-            'A full-stack commerce project exploring useful product flows and delivery.',
-        tags: ['Full-stack', 'Commerce'],
-    },
-    {
-        number: '03',
-        title: 'Wireless AV',
-        description:
-            'A management concept for connected audiovisual environments.',
-        tags: ['Systems', 'UX'],
-    },
-];
-
-const skills = [
-    {
-        index: 'A',
-        title: 'Frontend',
-        description: 'React, TypeScript, responsive UI and interaction.',
-    },
-    {
-        index: 'B',
-        title: 'Backend',
-        description: 'APIs, application logic, data and integrations.',
-    },
-    {
-        index: 'C',
-        title: 'Engineering',
-        description: 'Git, testing, delivery and maintainable code.',
-    },
-    {
-        index: 'D',
-        title: '3D & exploration',
-        description: 'Three.js, experiments and emerging technology.',
-    },
-];
 
 // Types the heading out letter by letter; the untyped rest stays in place invisibly, so the line never
 // reflows, and screen readers get the whole text at once
@@ -140,8 +80,9 @@ function onMouse(handler: () => void) {
     };
 }
 
-function ProjectCard({ project, index }: { project: (typeof projects)[number]; index: number }) {
+function ProjectCard({ project, index }: { project: Project; index: number }) {
     const [active, setActive] = useState(false);
+    const t = useTexts(homeText);
 
     return (
         <article
@@ -157,7 +98,7 @@ function ProjectCard({ project, index }: { project: (typeof projects)[number]; i
             </div>
             <h3>{project.title}</h3>
             <p>{project.description}</p>
-            <ul aria-label={`${project.title} technologies`}>
+            <ul aria-label={t.technologies(project.title)}>
                 {project.tags.map((tag) => (
                     <li key={tag}>{tag}</li>
                 ))}
@@ -165,14 +106,14 @@ function ProjectCard({ project, index }: { project: (typeof projects)[number]; i
             <SceneSlot className={styles.projectScene}>
                 {(inView) => <ProjectPreviewScene inView={inView} variant={index} active={active} />}
             </SceneSlot>
-            <a href="#contact" aria-label={`View case study: ${project.title}`}>
-                View case study <span aria-hidden="true">→</span>
+            <a href="#contact" aria-label={t.viewCaseStudyOf(project.title)}>
+                {t.viewCaseStudy} <span aria-hidden="true">→</span>
             </a>
         </article>
     );
 }
 
-function SkillCard({ skill, index }: { skill: (typeof skills)[number]; index: number }) {
+function SkillCard({ skill, index }: { skill: Skill; index: number }) {
     const [active, setActive] = useState(false);
 
     return (
@@ -191,6 +132,8 @@ function SkillCard({ skill, index }: { skill: (typeof skills)[number]; index: nu
 }
 
 function Home() {
+    const t = useTexts(homeText);
+
     // Coming from another page (e.g. /cv/ -> /#projects), the browser looks for the section before React
     // has rendered it and stays at the top; jump to it once it exists, and again once the web fonts are in,
     // because they can still change the height of the sections above it
@@ -268,47 +211,41 @@ function Home() {
                         </SceneSlot>
                         <img
                             src={profileImage}
-                            alt="Illustrated portrait of Gurpreet Singh"
+                            alt={t.portraitAlt}
                         />
                         <span>
-                            <strong>Full-stack developer</strong>
-                            Based in the Netherlands
+                            <strong>{t.role}</strong>
+                            {t.location}
                             <span className={styles.availability}>
-                                <span aria-hidden="true" /> Open to opportunities
+                                <span aria-hidden="true" /> {t.availability}
                             </span>
                         </span>
                     </div>
 
                     <div className={styles.heroContent}>
-                        <TypedHeading text="Hi, I'm Gurpreet." />
-                        <h2>
-                            I build thoughtful digital products from
-                            interface to infrastructure.
-                        </h2>
-                        <p className={styles.heroDescription}>
-                            Software Engineering student and full-stack
-                            developer focused on clear experiences,
-                            maintainable systems and continuous learning.
-                        </p>
+                        {/* keyed by the text, so switching language types the new greeting from the start */}
+                        <TypedHeading key={t.greeting} text={t.greeting} />
+                        <h2>{t.tagline}</h2>
+                        <p className={styles.heroDescription}>{t.intro}</p>
                         <div className={styles.actions}>
                             <a className={styles.primaryAction} href="#projects">
-                                View projects
+                                {t.viewProjects}
                             </a>
                             <a className={styles.secondaryAction} href="#contact">
-                                Contact me
+                                {t.contactMe}
                             </a>
                         </div>
                     </div>
                 </div>
 
                 <a className={styles.scrollCue} href="#about">
-                    <span>Scroll to transform the scene</span>
+                    <span>{t.scrollCue}</span>
                     <i aria-hidden="true" />
                 </a>
             </section>
 
             <div className={styles.valueStrip}>
-                {valueProps.map((value) => (
+                {t.valueProps.map((value) => (
                     <div className={styles.valueItem} key={value.eyebrow}>
                         <p className={styles.eyebrow}>{value.eyebrow}</p>
                         <p>{value.title}</p>
@@ -323,33 +260,27 @@ function Home() {
             >
                 <div className={`${styles.container} ${styles.aboutGrid}`}>
                     <SectionHeading
-                        eyebrow="About me"
-                        title="Engineering with curiosity and care"
-                        description="I enjoy turning complex requirements into understandable, reliable experiences — while continuously improving how I design, build and collaborate."
+                        eyebrow={t.about.eyebrow}
+                        title={t.about.title}
+                        description={t.about.description}
                     />
 
                     <div className={styles.glassPanel}>
                         <SceneSlot className={styles.aboutScene}>
                             {(inView) => <AboutRingsScene inView={inView} />}
                         </SceneSlot>
-                        <p className={styles.panelIndex}>What I bring</p>
+                        <p className={styles.panelIndex}>{t.about.panelTitle}</p>
                         <ul className={styles.principles}>
-                            <li>
-                                <span aria-hidden="true" />
-                                Clear thinking before writing code
-                            </li>
-                            <li>
-                                <span aria-hidden="true" />
-                                End-to-end ownership and pragmatic delivery
-                            </li>
-                            <li>
-                                <span aria-hidden="true" />
-                                A collaborative, feedback-driven approach
-                            </li>
+                            {t.about.principles.map((principle) => (
+                                <li key={principle}>
+                                    <span aria-hidden="true" />
+                                    {principle}
+                                </li>
+                            ))}
                         </ul>
                         {/* the CV page shows the CV first; the PDF download sits on that page */}
                         <a className={styles.secondaryAction} href="/cv/">
-                            View CV
+                            {t.about.viewCv}
                         </a>
                     </div>
                 </div>
@@ -362,13 +293,13 @@ function Home() {
             >
                 <div className={styles.container}>
                     <SectionHeading
-                        eyebrow="Selected work"
-                        title="Projects that connect code with real needs"
-                        description="Product, platform and systems work ready to grow into deeper case studies."
+                        eyebrow={t.projectsHeading.eyebrow}
+                        title={t.projectsHeading.title}
+                        description={t.projectsHeading.description}
                     />
 
                     <div className={styles.projectGrid}>
-                        {projects.map((project, index) => (
+                        {t.projects.map((project, index) => (
                             <ProjectCard project={project} index={index} key={project.title} />
                         ))}
                     </div>
@@ -382,18 +313,20 @@ function Home() {
             >
                 <div className={styles.container}>
                     <SectionHeading
-                        eyebrow="Capabilities"
+                        eyebrow={t.skillsHeading.eyebrow}
                         title={
                             <>
-                                A balanced <span className={styles.noWrap}>full-stack</span> toolkit
+                                {t.skillsHeading.title.before}
+                                <span className={styles.noWrap}>{t.skillsHeading.title.noWrap}</span>
+                                {t.skillsHeading.title.after}
                             </>
                         }
-                        description="Tools change. Strong fundamentals, thoughtful architecture and the ability to learn remain central."
+                        description={t.skillsHeading.description}
                     />
 
                     <div className={styles.skillGrid}>
-                        {skills.map((skill, index) => (
-                            <SkillCard skill={skill} index={index} key={skill.title} />
+                        {t.skills.map((skill, index) => (
+                            <SkillCard skill={skill} index={index} key={skill.index} />
                         ))}
                     </div>
                 </div>
@@ -406,12 +339,9 @@ function Home() {
             >
                 <div className={styles.container}>
                     <div className={styles.contactPanel}>
-                        <p className={styles.eyebrow}>Let&apos;s build something useful</p>
-                        <h2>Have a project, opportunity or idea?</h2>
-                        <p>
-                            I&apos;m always open to a good conversation about
-                            software, collaboration and learning.
-                        </p>
+                        <p className={styles.eyebrow}>{t.contact.eyebrow}</p>
+                        <h2>{t.contact.title}</h2>
+                        <p>{t.contact.description}</p>
                         <ContactForm />
                     </div>
                 </div>
