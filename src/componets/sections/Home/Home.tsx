@@ -72,6 +72,47 @@ const skills = [
     },
 ];
 
+// Types the heading out letter by letter; the untyped rest stays in place invisibly, so the line never
+// reflows, and screen readers get the whole text at once
+function TypedHeading({ text }: { text: string }) {
+    // with reduced motion the heading is simply there, fully typed
+    const [reducedMotion] = useState(
+        () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    );
+    const [count, setCount] = useState(reducedMotion ? text.length : 0);
+
+    useEffect(() => {
+        if (reducedMotion) {
+            return;
+        }
+        let index = 0;
+        let timer: number;
+        const typeNext = () => {
+            index += 1;
+            setCount(index);
+            if (index < text.length) {
+                // a little jitter so it feels typed by hand
+                timer = window.setTimeout(typeNext, 65 + Math.random() * 55);
+            }
+        };
+        timer = window.setTimeout(typeNext, 450);
+        return () => window.clearTimeout(timer);
+    }, [text, reducedMotion]);
+
+    return (
+        <h1 aria-label={text}>
+            <span aria-hidden="true">{text.slice(0, count)}</span>
+            <span
+                aria-hidden="true"
+                className={`${styles.caret} ${count >= text.length ? styles.caretDone : ''}`}
+            />
+            <span aria-hidden="true" className={styles.untyped}>
+                {text.slice(count)}
+            </span>
+        </h1>
+    );
+}
+
 function SectionHeading({
     eyebrow,
     title,
@@ -239,7 +280,7 @@ function Home() {
                     </div>
 
                     <div className={styles.heroContent}>
-                        <h1>Hi, I&apos;m Gurpreet.</h1>
+                        <TypedHeading text="Hi, I'm Gurpreet." />
                         <h2>
                             I build thoughtful digital products from
                             interface to infrastructure.

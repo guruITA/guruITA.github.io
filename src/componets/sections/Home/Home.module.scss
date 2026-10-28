@@ -104,6 +104,26 @@
   letter-spacing: -0.065em;
 }
 
+// net zero width (margin cancels it), so the caret never pushes the text around
+.caret {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.82em;
+  margin-right: -0.06em;
+  border-radius: 1px;
+  background: var(--color-mint);
+  vertical-align: -0.04em;
+}
+
+// solid while typing, blinking once the line is done
+.caretDone {
+  animation: caretBlink 1.05s step-end infinite;
+}
+
+.untyped {
+  visibility: hidden;
+}
+
 .hero h2 {
   max-width: 680px;
   margin: 1.5rem 0;
@@ -602,6 +622,12 @@
   }
 }
 
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @keyframes pulse {
   50% {
     opacity: 0.45;
@@ -837,7 +863,8 @@
   .profileVisual::before,
   .profileVisual::after,
   .availability span,
-  .scrollCue i {
+  .scrollCue i,
+  .caretDone {
     animation: none;
   }
 
