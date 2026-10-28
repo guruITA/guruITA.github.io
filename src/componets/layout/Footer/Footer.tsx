@@ -1,17 +1,33 @@
+import { useTexts } from '../../../i18n/language';
 import styles from './Footer.module.scss';
+
+const text = {
+    en: {
+        rights: 'All rights reserved.',
+        tagline: 'Designed for clarity, built with curiosity.',
+        social: 'Social links',
+    },
+    nl: {
+        rights: 'Alle rechten voorbehouden.',
+        tagline: 'Ontworpen voor helderheid, gebouwd met nieuwsgierigheid.',
+        social: 'Sociale media',
+    },
+};
 
 // Shared by the portfolio and the CV page
 function Footer() {
+    const t = useTexts(text);
+
     return (
         <footer className={styles.footer}>
             <div className={styles.inner}>
                 <div className={styles.brand}>
                     <strong>guruITA · Gurpreet Singh</strong>
                     {/* the year comes from the visitor's clock, so it never goes out of date */}
-                    <small>© {new Date().getFullYear()} · All rights reserved.</small>
+                    <small>© {new Date().getFullYear()} · {t.rights}</small>
                 </div>
-                <span>Designed for clarity, built with curiosity.</span>
-                <ul className={styles.socialLinks} aria-label="Social links">
+                <span>{t.tagline}</span>
+                <ul className={styles.socialLinks} aria-label={t.social}>
                     <li>
                         <a
                             href="https://instagram.com/guruITA"

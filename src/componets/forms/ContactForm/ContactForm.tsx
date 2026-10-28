@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import styles from './ContactForm.module.scss';
+import { useTexts } from '../../../i18n/language';
 import { loadTurnstile, type TurnstileApi } from './turnstile';
 
 type Status =
@@ -36,6 +37,41 @@ const MAX_MESSAGE_LENGTH = 5000;
 // Same rule as the contact Worker, so a rejected address is caught before sending.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const text = {
+    en: {
+        name: 'Your name',
+        email: 'Your email',
+        message: 'Your message',
+        messagePlaceholder: 'Tell me about your idea or question…',
+        send: 'Send message',
+        sending: 'Sending…',
+        success: "Thanks — your message is on its way. I'll reply soon.",
+        invalid: 'Please check your name and email, and write at least a short sentence about your idea or question.',
+        verifying: "One moment, checking that you're not a bot. Please press Send again in a second.",
+        tooFast: 'That was quick. Please check your message and press Send again.',
+        unverified: 'The spam check could not load. Please turn off blockers for this site or try again later.',
+        busy: 'The form has received a lot of messages recently. Please try again later.',
+        cooldown: 'You just sent a message. Please wait a few minutes before sending another one.',
+        error: 'Something went wrong. Please try again in a moment.',
+    },
+    nl: {
+        name: 'Je naam',
+        email: 'Je e-mailadres',
+        message: 'Je bericht',
+        messagePlaceholder: 'Vertel me over je idee of vraag…',
+        send: 'Bericht versturen',
+        sending: 'Versturen…',
+        success: 'Bedankt, je bericht is onderweg. Ik reageer zo snel mogelijk.',
+        invalid: 'Controleer je naam en e-mailadres, en schrijf minstens een korte zin over je idee of vraag.',
+        verifying: 'Even geduld, ik controleer of je geen bot bent. Verstuur je bericht zo nog een keer.',
+        tooFast: 'Dat ging snel. Controleer je bericht en verstuur het nog een keer.',
+        unverified: 'De spamcontrole kon niet laden. Zet adblockers uit voor deze site of probeer het later opnieuw.',
+        busy: 'Het formulier heeft de laatste tijd veel berichten gekregen. Probeer het later opnieuw.',
+        cooldown: 'Je hebt net een bericht verstuurd. Wacht een paar minuten voordat je er nog een stuurt.',
+        error: 'Er ging iets mis. Probeer het zo nog een keer.',
+    },
+};
+
 /**
  * Reads when this browser last sent a message through the form.
  *
@@ -67,6 +103,7 @@ function rememberSent(): void {
 
 function ContactForm() {
     const [status, setStatus] = useState<Status>('idle');
+    const t = useTexts(text);
     // When the visitor first clicked or typed in the form, to spot submissions that are too fast to be human.
     const startedAt = useRef(0);
     const formRef = useRef<HTMLFormElement>(null);
@@ -268,22 +305,22 @@ function ContactForm() {
         >
             <div className={styles.row}>
                 <label className={styles.field}>
-                    <span className={styles.srOnly}>Your name</span>
+                    <span className={styles.srOnly}>{t.name}</span>
                     <input
                         type="text"
                         name="name"
-                        placeholder="Your name"
+                        placeholder={t.name}
                         required
                         maxLength={MAX_NAME_LENGTH}
                         autoComplete="name"
                     />
                 </label>
                 <label className={styles.field}>
-                    <span className={styles.srOnly}>Your email</span>
+                    <span className={styles.srOnly}>{t.email}</span>
                     <input
                         type="email"
                         name="email"
-                        placeholder="Your email"
+                        placeholder={t.email}
                         required
                         maxLength={MAX_EMAIL_LENGTH}
                         autoComplete="email"
@@ -292,14 +329,14 @@ function ContactForm() {
             </div>
 
             <label className={styles.field}>
-                <span className={styles.srOnly}>Your message</span>
+                <span className={styles.srOnly}>{t.message}</span>
                 <textarea
                     name="message"
                     required
                     minLength={MIN_MESSAGE_LENGTH}
                     maxLength={MAX_MESSAGE_LENGTH}
                     rows={4}
-                    placeholder="Tell me about your idea or question…"
+                    placeholder={t.messagePlaceholder}
                 />
             </label>
 
@@ -321,13 +358,13 @@ function ContactForm() {
                     className={styles.sendButton}
                     disabled={status === 'submitting'}
                 >
-                    {status === 'submitting' ? 'Sending…' : 'Send message'}
+                    {status === 'submitting' ? t.sending : t.send}
                 </button>
             </div>
 
             {status === 'success' && (
                 <p className={styles.statusMessage} role="status">
-                    Thanks — your message is on its way. I&apos;ll reply soon.
+                    {t.success}
                 </p>
             )}
             {status === 'invalid' && (
@@ -335,17 +372,17 @@ function ContactForm() {
                     className={`${styles.statusMessage} ${styles.statusError}`}
                     role="alert"
                 >
-                    Please check your name and email, and write at least a short sentence about your idea or question.
+                    {t.invalid}
                 </p>
             )}
             {status === 'verifying' && (
                 <p className={styles.statusMessage} role="status">
-                    One moment, checking that you&apos;re not a bot. Please press Send again in a second.
+                    {t.verifying}
                 </p>
             )}
             {status === 'tooFast' && (
                 <p className={styles.statusMessage} role="status">
-                    That was quick. Please check your message and press Send again.
+                    {t.tooFast}
                 </p>
             )}
             {status === 'unverified' && (
@@ -353,7 +390,7 @@ function ContactForm() {
                     className={`${styles.statusMessage} ${styles.statusError}`}
                     role="alert"
                 >
-                    The spam check could not load. Please turn off blockers for this site or try again later.
+                    {t.unverified}
                 </p>
             )}
             {status === 'busy' && (
@@ -361,7 +398,7 @@ function ContactForm() {
                     className={`${styles.statusMessage} ${styles.statusError}`}
                     role="alert"
                 >
-                    The form has received a lot of messages recently. Please try again later.
+                    {t.busy}
                 </p>
             )}
             {status === 'cooldown' && (
@@ -369,7 +406,7 @@ function ContactForm() {
                     className={`${styles.statusMessage} ${styles.statusError}`}
                     role="alert"
                 >
-                    You just sent a message. Please wait a few minutes before sending another one.
+                    {t.cooldown}
                 </p>
             )}
             {status === 'error' && (
@@ -377,7 +414,7 @@ function ContactForm() {
                     className={`${styles.statusMessage} ${styles.statusError}`}
                     role="alert"
                 >
-                    Something went wrong. Please try again in a moment.
+                    {t.error}
                 </p>
             )}
         </form>

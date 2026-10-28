@@ -1,11 +1,11 @@
-// Prints the built /cv/ page to dist/cv/gurpreet-singh-cv.pdf, so the PDF always matches the page.
+// Prints the built /cv/ page to a PDF per language in dist/cv/, so the PDFs always match the page.
 // Runs after `vite build`.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { preview } from 'vite';
-import { CV_PDF_PATH, renderCvPdf } from './cv-pdf.mjs';
+import { CV_PDF_PATHS, renderCvPdf } from './cv-pdf.mjs';
 
-const output = join(resolve(import.meta.dirname, '../dist'), CV_PDF_PATH);
+const dist = resolve(import.meta.dirname, '../dist');
 
 const server = await preview({ preview: { port: 4180, open: false }, logLevel: 'warn' });
 try {
@@ -13,10 +13,13 @@ try {
     if (!baseUrl) {
         throw new Error('vite preview did not report a local URL');
     }
-    const pdf = await renderCvPdf(baseUrl);
-    await mkdir(dirname(output), { recursive: true });
-    await writeFile(output, pdf);
-    console.log(`CV PDF written to ${output}`);
+    for (const [language, path] of Object.entries(CV_PDF_PATHS)) {
+        const output = join(dist, path);
+        const pdf = await renderCvPdf(baseUrl, language);
+        await mkdir(dirname(output), { recursive: true });
+        await writeFile(output, pdf);
+        console.log(`CV PDF (${language}) written to ${output}`);
+    }
 } finally {
     await server.close();
 }
