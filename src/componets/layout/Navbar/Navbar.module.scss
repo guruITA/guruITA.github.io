@@ -85,7 +85,9 @@
     }
 
     .navLinks {
+        position: relative;
         display: flex;
+        align-items: center;
         gap: 2rem;
         margin: 0 0 0 auto;
         padding: 0;
@@ -93,43 +95,79 @@
 
         // the block padding makes the tap area taller without moving the text
         a {
-            position: relative;
             display: block;
             padding-block: 0.6rem;
 
             color: var(--color-light-gray);
             text-decoration: none;
             font-weight: 500;
+            white-space: nowrap;
 
             transition: color 0.2s ease;
 
-            &::after {
-                content: '';
-                position: absolute;
-
-                left: 0;
-                bottom: calc(0.6rem - 6px);
-
-                width: 100%;
-                height: 2px;
-
-                background-color: var(--color-blue);
-
-                transform: scaleX(0);
-                transform-origin: left;
-
-                transition: transform 0.2s ease;
-            }
-
-            // the link of the page you are on (CV) looks like a hovered link
             &:hover,
-            &[aria-current='page'] {
+            &[aria-current='location'] {
                 color: var(--color-blue);
-
-                &::after {
-                    transform: scaleX(1);
-                }
             }
+        }
+
+        // Figma: Components — live site / Desktop / Nav CV (the primary action, smaller)
+        a.cvButton {
+            padding: 0.5rem 1rem;
+            border-radius: 0.625rem;
+            background: linear-gradient(135deg, var(--color-blue), #2563eb);
+            color: var(--color-dark-navy);
+            font-weight: 700;
+            box-shadow: 0 0.375rem 1.125rem rgba(37, 99, 235, 0.28);
+            transition:
+                transform 180ms ease,
+                box-shadow 180ms ease;
+
+            &:hover,
+            &:focus-visible,
+            &[aria-current='page'] {
+                color: var(--color-dark-navy);
+                box-shadow: 0 0.5rem 1.5rem rgba(37, 99, 235, 0.45);
+            }
+
+            &:hover,
+            &:focus-visible {
+                transform: translateY(-2px);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--color-blue-bright);
+                outline-offset: 3px;
+            }
+        }
+
+        // slides to the link of the section you are on; placed by Navbar.tsx at the
+        // bottom edge of that link, 4px under the text (the link has 0.6rem padding)
+        .activeLine {
+            position: absolute;
+            top: calc(4px - 0.6rem);
+            left: 0;
+            height: 2px;
+            border-radius: 1px;
+            background-color: var(--color-blue);
+            pointer-events: none;
+            transition:
+                transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navbar .navLinks {
+        .activeLine,
+        a.cvButton {
+            transition: none;
+        }
+
+        a.cvButton:hover,
+        a.cvButton:focus-visible {
+            transform: none;
         }
     }
 }
@@ -145,7 +183,8 @@
     }
 }
 
-@media (max-width: 768px) {
+// the menu button takes over below 900px: with the 'Mijn CV' button the Dutch links need about 830px
+@media (max-width: 900px) {
     .navbar {
         padding: 0 1.5rem;
 
@@ -181,10 +220,11 @@
                 display: flex;
             }
 
-            a {
+            a:not(.cvButton) {
                 color: var(--color-light-gray);
 
-                &:hover {
+                &:hover,
+                &[aria-current='location'] {
                     color: var(--color-blue);
                 }
             }
