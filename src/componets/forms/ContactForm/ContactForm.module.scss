@@ -57,8 +57,9 @@
     min-height: 2.75rem;
   }
 
+  // shorter on short screens, so the contact section still fits one screen
   textarea {
-    min-height: 6rem;
+    min-height: clamp(4.5rem, 12svh, 6rem);
   }
 }
 

@@ -2,6 +2,7 @@ import { lazy, useEffect, useState, type PointerEvent, type ReactNode } from 're
 import profileImage from '../../../assets/profile.webp';
 import ContactForm from '../../forms/ContactForm/ContactForm';
 import SocialLinks from '../../layout/SocialLinks/SocialLinks';
+import Carousel from '../../ui/Carousel/Carousel';
 import SceneSlot from '../../three/SceneSlot';
 import { useTexts } from '../../../i18n/language';
 import styles from './Home.module.scss';
@@ -241,15 +242,6 @@ function Home() {
                 </div>
             </section>
 
-            <div className={styles.valueStrip}>
-                {t.valueProps.map((value) => (
-                    <div className={styles.valueItem} key={value.eyebrow}>
-                        <p className={styles.eyebrow}>{value.eyebrow}</p>
-                        <p>{value.title}</p>
-                    </div>
-                ))}
-            </div>
-
             <section
                 className={`${styles.section} ${styles.about}`}
                 id="about"
@@ -295,11 +287,11 @@ function Home() {
                         description={t.projectsHeading.description}
                     />
 
-                    <div className={styles.projectGrid}>
+                    <Carousel className={styles.projectGrid} label={t.projectsLabel} dotLabel={t.showCard}>
                         {t.projects.map((project, index) => (
                             <ProjectCard project={project} index={index} key={project.title} />
                         ))}
-                    </div>
+                    </Carousel>
                 </div>
             </section>
 
@@ -321,11 +313,11 @@ function Home() {
                         description={t.skillsHeading.description}
                     />
 
-                    <div className={styles.skillGrid}>
+                    <Carousel className={styles.skillGrid} label={t.skillsLabel} dotLabel={t.showCard}>
                         {t.skills.map((skill, index) => (
                             <SkillCard skill={skill} index={index} key={skill.index} />
                         ))}
-                    </div>
+                    </Carousel>
                 </div>
             </section>
 
