@@ -159,8 +159,10 @@ fn calcNormal(p: vec3f) -> vec3f {
   let m = (u.b.xy - vec2f(0.5)) * u.b.w;
   let ease = smoothstep(0.0, 1.0, pr);
   let ang = 0.6 + pr * 3.6 + m.x * 0.4;
-  let rad = mix(24.0, 8.5, ease);
-  let hgt = mix(15.0, 2.2, ease) - m.y * 1.5;
+  // the camera dollies in but stays above the roofs (the tallest tower is 9.4 high), so near
+  // facades never fill the screen as large flat slabs
+  let rad = mix(24.0, 13.5, ease);
+  let hgt = max(mix(15.0, 10.5, ease) - m.y * 1.5, 10.0);
   let ro = vec3f(sin(ang) * rad, hgt, cos(ang) * rad);
   let ta = vec3f(0.0, mix(6.5, 5.0, pr), 0.0);
   let fw = normalize(ta - ro);

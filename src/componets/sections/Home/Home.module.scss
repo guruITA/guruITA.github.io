@@ -1,44 +1,66 @@
 @use '../../../styles/buttons';
+@use '../../../styles/carousel';
 
 .portfolio {
   position: relative;
   color: var(--color-off-white);
+
+  // one even tint over the city for the whole page; where two sections meet, their own shading
+  // has faded out (see .section::before), so the page runs on without a hard edge
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 7, 19, 0.45);
+    pointer-events: none;
+  }
 }
 
 .section {
   position: relative;
-  padding: clamp(4rem, 6vw, 6rem) 0;
+  // every section fills one screen under the 5rem navbar; spacing follows the screen height,
+  // so the content also fits on short laptop screens
+  min-height: calc(100svh - 5rem);
+  padding: clamp(1.5rem, 6svh, 5rem) 0;
   display: flex;
   align-items: center;
   isolation: isolate;
   scroll-margin-top: 5rem;
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  --fade: min(22svh, 14rem);
 
-  &.revealed {
+  // only the content slides in; the shading stays put, so it is there before the next section shows
+  > .container {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  &.revealed > .container {
     opacity: 1;
     transform: translateY(0);
   }
 
+  // each section shades the city its own way (dark left, dark right, ...); the shading fades out
+  // towards the top and bottom, so one section's dark side flows into the next one's
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent);
     pointer-events: none;
   }
 }
 
 .container {
-  width: min(100% - 3rem, 1200px);
+  // the space to the screen edge; carousels use it to run edge to edge
+  --gutter: 1.5rem;
+  width: min(100% - 2 * var(--gutter), 1200px);
   margin: 0 auto;
 }
 
 .hero {
-  min-height: 760px;
-  padding-top: 6.5rem;
-  padding-bottom: 4rem;
   // the profile orbit reaches past the viewport; without this, phones zoom the page out to fit it
   overflow-x: clip;
 
@@ -47,10 +69,11 @@
     overflow-x: hidden;
   }
 
+  // the top of the page has no section above it: only the bottom fades out
   &::before {
-    background:
-      linear-gradient(90deg, rgba(2, 7, 19, 0.94) 0%, rgba(2, 7, 19, 0.72) 43%, transparent 72%),
-      linear-gradient(180deg, transparent 65%, rgba(2, 7, 19, 0.75));
+    background: linear-gradient(90deg, rgba(2, 7, 19, 0.94) 0%, rgba(2, 7, 19, 0.72) 43%, transparent 72%);
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - var(--fade)), transparent);
+    mask-image: linear-gradient(180deg, #000 calc(100% - var(--fade)), transparent);
   }
 }
 
@@ -99,7 +122,7 @@
 .hero h1 {
   max-width: 760px;
   margin: 0;
-  font-size: clamp(2.75rem, 4.45vw, 4rem);
+  font-size: clamp(2.5rem, min(4.45vw, 7.5svh), 4rem);
   line-height: 0.92;
   letter-spacing: -0.065em;
 }
@@ -126,19 +149,19 @@
 
 .hero h2 {
   max-width: 680px;
-  margin: 1.5rem 0;
+  margin: clamp(0.75rem, 2.5svh, 1.5rem) 0;
   color: var(--color-blue-bright);
-  font-size: clamp(1.35rem, 2.4vw, 2.125rem);
+  font-size: clamp(1.25rem, min(2.4vw, 4.2svh), 2.125rem);
   line-height: 1.04;
   letter-spacing: -0.035em;
 }
 
 .heroDescription {
   max-width: 600px;
-  margin: 0 0 2rem;
+  margin: 0 0 clamp(1rem, 3.5svh, 2rem);
   color: var(--color-light-gray);
   font-size: clamp(1rem, 1.4vw, 1.15rem);
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
 .actions {
@@ -148,7 +171,7 @@
 }
 
 .heroSocials {
-  margin-top: 2rem;
+  margin-top: clamp(1rem, 3.5svh, 2rem);
 }
 
 .primaryAction {
@@ -162,7 +185,7 @@
 .profileVisual {
   position: relative;
   grid-area: visual;
-  width: min(34vw, 470px);
+  width: min(34vw, 470px, 52svh);
   aspect-ratio: 470 / 520;
   margin: 0 auto;
   padding: clamp(1.25rem, 3vw, 2.5rem);
@@ -253,34 +276,6 @@
   }
 }
 
-.valueStrip {
-  position: relative;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1.875rem clamp(1.5rem, 5vw, 5rem);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
-  background: rgba(10, 23, 48, 0.58);
-}
-
-.valueItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  .eyebrow {
-    margin: 0;
-  }
-
-  p:last-child {
-    margin: 0;
-    color: var(--color-off-white);
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-}
-
 // keeps a word like 'full-stack' from breaking at its hyphen
 .noWrap {
   white-space: nowrap;
@@ -290,13 +285,13 @@
   max-width: 720px;
 
   .eyebrow {
-    margin: 0 0 1rem;
+    margin: 0 0 clamp(0.5rem, 1.8svh, 1rem);
   }
 
   // balance spreads the words over the lines, so no single word ends up alone
   h2 {
     margin: 0;
-    font-size: clamp(1.9rem, 2.92vw, 2.625rem);
+    font-size: clamp(1.75rem, min(2.92vw, 5svh), 2.625rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
@@ -304,10 +299,10 @@
 
   > p:last-child {
     max-width: 620px;
-    margin: 1.5rem 0 0;
+    margin: clamp(0.75rem, 2.5svh, 1.5rem) 0 0;
     color: var(--color-light-gray);
     font-size: 1.05rem;
-    line-height: 1.75;
+    line-height: 1.65;
   }
 }
 
@@ -395,7 +390,7 @@
 }
 
 .projectGrid {
-  margin-top: clamp(3rem, 7vw, 5.5rem);
+  margin-top: clamp(1.5rem, 5svh, 4rem);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.75rem;
@@ -403,8 +398,7 @@
 
 .projectCard {
   position: relative;
-  min-height: 420px;
-  padding: 1.6rem;
+  padding: clamp(1.1rem, 2.6svh, 1.6rem);
   border-radius: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -420,7 +414,7 @@
   }
 
   h3 {
-    margin: 1.8rem 0 0.9rem;
+    margin: clamp(0.9rem, 2.6svh, 1.8rem) 0 clamp(0.5rem, 1.2svh, 0.9rem);
     font-size: 1.55rem;
   }
 
@@ -431,7 +425,7 @@
   }
 
   ul {
-    margin: 1.5rem 0;
+    margin: clamp(0.75rem, 2svh, 1.5rem) 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
@@ -483,7 +477,7 @@
   span {
     color: var(--color-blue);
     opacity: 0.65;
-    font-size: 3.25rem;
+    font-size: clamp(2.25rem, 5.5svh, 3.25rem);
     font-weight: 800;
     line-height: 1;
   }
@@ -497,8 +491,8 @@
 
 // 3D preview in the open middle of the card, between the tags and the case study link
 .projectScene {
-  height: 10rem;
-  margin: 0 -0.75rem 1.25rem;
+  height: clamp(4rem, 13svh, 10rem);
+  margin: 0 -0.75rem clamp(0.5rem, 1.6svh, 1.25rem);
   pointer-events: none;
 }
 
@@ -509,15 +503,14 @@
 }
 
 .skillGrid {
-  margin-top: clamp(3rem, 7vw, 5.5rem);
+  margin-top: clamp(1.5rem, 5svh, 4rem);
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.625rem;
 }
 
 .skillCard {
-  min-height: 250px;
-  padding: 1.5rem;
+  padding: clamp(1.1rem, 2.6svh, 1.5rem);
   border-radius: 1.1rem;
   transition:
     transform 200ms ease,
@@ -551,7 +544,7 @@
   }
 
   h3 {
-    margin: 1.5rem 0 0.75rem;
+    margin: clamp(0.9rem, 2.4svh, 1.5rem) 0 0.75rem;
     font-size: 1.2rem;
   }
 
@@ -571,18 +564,18 @@
 .contactPanel {
   max-width: 980px;
   margin: 0 auto;
-  padding: clamp(2rem, 7vw, 5rem);
+  padding: clamp(1.5rem, min(7vw, 8svh), 5rem);
   border-radius: 2rem;
   text-align: center;
 
   .eyebrow {
-    margin: 0 0 1rem;
+    margin: 0 0 clamp(0.5rem, 1.8svh, 1rem);
   }
 
   h2 {
     max-width: 760px;
     margin: 0 auto;
-    font-size: clamp(1.85rem, 2.78vw, 2.5rem);
+    font-size: clamp(1.75rem, min(2.78vw, 5svh), 2.5rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
@@ -590,7 +583,7 @@
 
   > p:not(.eyebrow) {
     max-width: 640px;
-    margin: 1.5rem auto 2rem;
+    margin: clamp(0.75rem, 2.5svh, 1.5rem) auto clamp(1rem, 3.5svh, 2rem);
     color: var(--color-light-gray);
     line-height: 1.7;
   }
@@ -620,12 +613,9 @@
 }
 
 @media (max-width: 960px) {
+  // three cards under each other never fit one screen: swipe them instead
   .projectGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .projectCard {
-    min-height: 330px;
+    @include carousel.track(min(82vw, 22rem), var(--gutter));
   }
 
   .skillGrid {
@@ -634,20 +624,16 @@
 }
 
 @media (max-width: 768px) {
-  // sections are as tall as their content, so there are no empty screens between them
+  // sections still fill one screen; the spacing is tighter than on wide screens
   .section {
-    padding: 3.5rem 0;
-    align-items: flex-start;
+    padding: clamp(1rem, 3svh, 3rem) 0;
   }
 
   .container {
-    width: min(100% - 2rem, 1200px);
+    --gutter: 1rem;
   }
 
   .hero {
-    min-height: auto;
-    padding-top: 6.25rem;
-
     &::before {
       background: linear-gradient(180deg, rgba(2, 7, 19, 0.24), rgba(2, 7, 19, 0.91) 45%, rgba(2, 7, 19, 0.97));
     }
@@ -658,16 +644,60 @@
     grid-template-areas:
       'visual'
       'copy';
-    gap: 3.25rem;
+    gap: clamp(0.75rem, 2svh, 2rem);
   }
 
+  // photo and caption under each other inside the card, so the caption never covers the photo
+  // (on a small card an overlaid caption would hide its lower half)
   .profileVisual {
-    width: min(72vw, 310px);
+    --photo: min(40vw, 14svh);
+    --pad: clamp(0.75rem, 1.8svh, 1rem);
+    width: auto;
+    aspect-ratio: auto;
+    padding: var(--pad) 1.25rem;
+    gap: clamp(0.6rem, 1.6svh, 1rem);
+
+    img {
+      width: var(--photo);
+    }
+
+    // the card is taller than wide here, so the rings and the 3D orb are circles around the
+    // middle of the photo instead of the card; translate leaves the rings' transforms alone
+    &::before,
+    &::after,
+    .profileOrbit,
+    .heroScene {
+      inset: auto;
+      top: calc(var(--pad) + var(--photo) / 2);
+      left: 50%;
+      aspect-ratio: 1;
+      translate: -50% -50%;
+    }
+
+    &::before {
+      width: calc(var(--photo) * 1.6);
+    }
+
+    &::after {
+      width: calc(var(--photo) * 1.3);
+    }
+
+    .profileOrbit {
+      width: calc(var(--photo) * 2);
+    }
+
+    .heroScene {
+      width: calc(var(--photo) * 1.9);
+    }
 
     // wide enough on small phones for each caption line to stay on one line
     > span {
-      bottom: -1.5rem;
-      width: max(78%, 14rem);
+      position: relative;
+      left: auto;
+      bottom: auto;
+      width: 14rem;
+      padding: 0.6rem 1rem;
+      transform: none;
     }
   }
 
@@ -676,12 +706,12 @@
   }
 
   .hero h1 {
-    font-size: clamp(2.4rem, 10.5vw, 4rem);
+    font-size: clamp(2.2rem, min(10.5vw, 6svh), 4rem);
   }
 
   .hero h2 {
-    margin-top: 1.25rem;
-    font-size: clamp(1.35rem, 6.2vw, 2rem);
+    margin-top: clamp(0.75rem, 2svh, 1.25rem);
+    font-size: clamp(1.2rem, min(6.2vw, 3.4svh), 2rem);
     text-wrap: balance;
   }
 
@@ -696,17 +726,28 @@
   }
 
   .heroSocials {
-    margin-top: 1.5rem;
+    margin-top: clamp(0.75rem, 2.5svh, 1.5rem);
   }
 
   .aboutGrid {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: clamp(2.25rem, 5svh, 3rem);
   }
 
-  .valueStrip {
-    padding: 1.5rem;
-    text-align: center;
+  .glassPanel {
+    padding: clamp(1.25rem, 3.5svh, 2.5rem);
+  }
+
+  .panelIndex {
+    margin-bottom: clamp(1rem, 2.5svh, 1.75rem);
+  }
+
+  .principles {
+    gap: clamp(0.6rem, 1.6svh, 1.1rem);
+  }
+
+  .glassPanel .secondaryAction {
+    margin-top: clamp(1rem, 2.5svh, 1.75rem);
   }
 
   .about {
@@ -721,7 +762,7 @@
     text-align: center;
 
     h2 {
-      font-size: clamp(1.75rem, 7.5vw, 2.5rem);
+      font-size: clamp(1.6rem, min(7.5vw, 4.5svh), 2.5rem);
     }
 
     > p:last-child {
@@ -731,7 +772,7 @@
 
   .projectGrid,
   .skillGrid {
-    margin-top: 3rem;
+    margin-top: clamp(0.75rem, 3svh, 3rem);
   }
 
   .aboutScene {
@@ -741,12 +782,11 @@
     height: 7rem;
   }
 
-  // the empty top of the preview is room for the hover animation, which touch screens never show;
-  // tuck it under the tags so the card has no empty block
+  // under the tags, not tucked behind them: the preview would otherwise cover the tags
   .projectScene {
-    height: 8.5rem;
-    margin-top: -2.5rem;
-    margin-bottom: 0.5rem;
+    height: clamp(2.75rem, 6svh, 6rem);
+    margin-top: 0;
+    margin-bottom: 0.25rem;
   }
 
   // project cards follow the centered axis: number with a short line under it, then centered text
@@ -754,6 +794,7 @@
     text-align: center;
 
     ul {
+      margin-block: clamp(0.5rem, 1.5svh, 1.5rem);
       justify-content: center;
     }
 
@@ -787,23 +828,17 @@
 
 }
 
-// phones: one column and full-width buttons; tablets keep the wider layout above
+// phones: one column, buttons side by side (each on its own line when they do not fit);
+// tablets keep the wider layout above
 @media (max-width: 600px) {
-  .actions {
-    flex-direction: column;
-  }
-
   .primaryAction,
   .secondaryAction {
-    width: 100%;
+    flex: 1 1 9rem;
   }
 
-  .valueStrip {
-    grid-template-columns: 1fr;
-  }
-
+  // four cards under each other never fit one screen: swipe them instead
   .skillGrid {
-    grid-template-columns: 1fr;
+    @include carousel.track(min(80vw, 20rem), var(--gutter));
   }
 
   // icon on the left, title and text in one column next to it, so a card is only as tall as its text
@@ -833,7 +868,13 @@
   }
 
   .contactPanel {
-    padding: 2.25rem 1.25rem;
+    padding: clamp(1.25rem, 4svh, 2.25rem) 1.25rem;
+  }
+
+  // shorter lines of the intro on short phones; the text stays the same
+  .heroDescription {
+    font-size: clamp(0.95rem, 2.2svh, 1rem);
+    line-height: 1.6;
   }
 }
 
@@ -849,7 +890,7 @@
   .skillCard,
   .primaryAction,
   .secondaryAction,
-  .section {
+  .section > .container {
     transition: none;
   }
 }

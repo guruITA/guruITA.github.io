@@ -13,17 +13,18 @@ function ScrollInvalidate() {
         // one frame per scroll event (they come about once a frame; more would queue up frames), and two
         // once scrolling stops: drei draws a view that just came into the screen one frame late, and without
         // idle frames (reduced motion) nothing else would draw it. A timer, as Safari has no scrollend.
+        // Capture also catches the scroll of elements (the carousels), which does not bubble to window.
         let settle = 0;
         const redraw = () => {
             invalidate();
             clearTimeout(settle);
             settle = window.setTimeout(() => invalidate(2), 120);
         };
-        window.addEventListener('scroll', redraw, { passive: true });
+        window.addEventListener('scroll', redraw, { capture: true, passive: true });
         window.addEventListener('resize', redraw);
         return () => {
             clearTimeout(settle);
-            window.removeEventListener('scroll', redraw);
+            window.removeEventListener('scroll', redraw, { capture: true });
             window.removeEventListener('resize', redraw);
         };
     }, [invalidate]);

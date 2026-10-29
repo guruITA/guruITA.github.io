@@ -11,11 +11,6 @@ const en = {
     intro: 'Software Engineering student and full-stack developer focused on clear experiences, maintainable systems and continuous learning.',
     viewProjects: 'View projects',
     contactMe: 'Contact me',
-    valueProps: [
-        { eyebrow: 'Product mindset', title: 'From idea to useful outcome' },
-        { eyebrow: 'Full-stack', title: 'Frontend, backend and delivery' },
-        { eyebrow: 'Always learning', title: 'Curious, reflective and improving' },
-    ],
     about: {
         eyebrow: 'About me',
         title: 'Engineering with curiosity and care',
@@ -57,6 +52,9 @@ const en = {
     technologies: (project: string) => `${project} technologies`,
     viewCaseStudy: 'View case study',
     viewCaseStudyOf: (project: string) => `View case study: ${project}`,
+    projectsLabel: 'Projects',
+    skillsLabel: 'Skills',
+    showCard: (index: number, count: number) => `Show ${index + 1} of ${count}`,
     skillsHeading: {
         eyebrow: 'Capabilities',
         // the middle part never breaks, so "full-stack" does not split over two lines
@@ -87,11 +85,6 @@ const nl: typeof en = {
     intro: 'Software Engineering-student en full-stack developer, gericht op heldere ervaringen, onderhoudbare systemen en blijven leren.',
     viewProjects: 'Bekijk projecten',
     contactMe: 'Neem contact op',
-    valueProps: [
-        { eyebrow: 'Productgericht', title: 'Van idee tot bruikbaar resultaat' },
-        { eyebrow: 'Full-stack', title: 'Frontend, backend en oplevering' },
-        { eyebrow: 'Altijd aan het leren', title: 'Nieuwsgierig, kritisch op mezelf en steeds beter' },
-    ],
     about: {
         eyebrow: 'Over mij',
         title: 'Software bouwen met nieuwsgierigheid en zorg',
@@ -133,6 +126,9 @@ const nl: typeof en = {
     technologies: (project: string) => `Technieken van ${project}`,
     viewCaseStudy: 'Bekijk casestudy',
     viewCaseStudyOf: (project: string) => `Bekijk casestudy: ${project}`,
+    projectsLabel: 'Projecten',
+    skillsLabel: 'Vaardigheden',
+    showCard: (index: number, count: number) => `Toon ${index + 1} van ${count}`,
     skillsHeading: {
         eyebrow: 'Vaardigheden',
         title: { before: 'Een veelzijdige ', noWrap: 'full-stack', after: ' toolkit' },

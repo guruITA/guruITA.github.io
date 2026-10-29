@@ -156,8 +156,10 @@ void main() {
   vec2 m = (uB.xy - vec2(0.5)) * uB.w;
   float ease = smoothstep(0.0, 1.0, pr);
   float ang = 0.6 + pr * 3.6 + m.x * 0.4;
-  float rad = mix(24.0, 8.5, ease);
-  float hgt = mix(15.0, 2.2, ease) - m.y * 1.5;
+  // the camera dollies in but stays above the roofs (the tallest tower is 9.4 high), so near
+  // facades never fill the screen as large flat slabs
+  float rad = mix(24.0, 13.5, ease);
+  float hgt = max(mix(15.0, 10.5, ease) - m.y * 1.5, 10.0);
   vec3 ro = vec3(sin(ang) * rad, hgt, cos(ang) * rad);
   vec3 ta = vec3(0.0, mix(6.5, 5.0, pr), 0.0);
   vec3 fw = normalize(ta - ro);
