@@ -11,7 +11,6 @@ const en = {
     intro: 'Software Engineering student and full-stack developer focused on clear experiences, maintainable systems and continuous learning.',
     viewProjects: 'View projects',
     contactMe: 'Contact me',
-    scrollCue: 'Scroll to transform the scene',
     valueProps: [
         { eyebrow: 'Product mindset', title: 'From idea to useful outcome' },
         { eyebrow: 'Full-stack', title: 'Frontend, backend and delivery' },
@@ -88,7 +87,6 @@ const nl: typeof en = {
     intro: 'Software Engineering-student en full-stack developer, gericht op heldere ervaringen, onderhoudbare systemen en blijven leren.',
     viewProjects: 'Bekijk projecten',
     contactMe: 'Neem contact op',
-    scrollCue: 'Scroll om de scène te veranderen',
     valueProps: [
         { eyebrow: 'Productgericht', title: 'Van idee tot bruikbaar resultaat' },
         { eyebrow: 'Full-stack', title: 'Frontend, backend en oplevering' },
