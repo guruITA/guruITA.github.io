@@ -1,6 +1,7 @@
 import { lazy, useEffect, useState, type PointerEvent, type ReactNode } from 'react';
 import profileImage from '../../../assets/profile.webp';
 import ContactForm from '../../forms/ContactForm/ContactForm';
+import SocialLinks from '../../layout/SocialLinks/SocialLinks';
 import SceneSlot from '../../three/SceneSlot';
 import { useTexts } from '../../../i18n/language';
 import styles from './Home.module.scss';
@@ -235,6 +236,7 @@ function Home() {
                                 {t.contactMe}
                             </a>
                         </div>
+                        <SocialLinks className={styles.heroSocials} />
                     </div>
                 </div>
             </section>

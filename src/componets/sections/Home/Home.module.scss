@@ -147,6 +147,10 @@
   gap: 0.85rem;
 }
 
+.heroSocials {
+  margin-top: 2rem;
+}
+
 .primaryAction {
   @include buttons.primary-action;
 }
@@ -686,8 +690,13 @@
     margin-right: auto;
   }
 
-  .actions {
+  .actions,
+  .heroSocials {
     justify-content: center;
+  }
+
+  .heroSocials {
+    margin-top: 1.5rem;
   }
 
   .aboutGrid {
