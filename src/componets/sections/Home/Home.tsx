@@ -237,11 +237,6 @@ function Home() {
                         </div>
                     </div>
                 </div>
-
-                <a className={styles.scrollCue} href="#about">
-                    <span>{t.scrollCue}</span>
-                    <i aria-hidden="true" />
-                </a>
             </section>
 
             <div className={styles.valueStrip}>
