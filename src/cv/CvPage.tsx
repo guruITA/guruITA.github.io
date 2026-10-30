@@ -17,6 +17,7 @@ const text = {
     en: {
         download: { idle: 'Download PDF', busy: 'Preparing PDF…', done: 'Downloaded ✓' },
         photoAlt: (name: string) => `Photo of ${name}`,
+        profile: 'About me',
         education: 'Education',
         internships: 'Internships',
         experience: 'Work experience',
@@ -28,6 +29,7 @@ const text = {
     nl: {
         download: { idle: 'Download PDF', busy: 'PDF wordt klaargemaakt…', done: 'Gedownload ✓' },
         photoAlt: (name: string) => `Foto van ${name}`,
+        profile: 'Over mij',
         education: 'Opleiding',
         internships: 'Stages',
         experience: 'Werkervaring',
@@ -97,9 +99,9 @@ function DownloadButton() {
     );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, className, children }: { title: string; className?: string; children: ReactNode }) {
     return (
-        <section className={styles.section}>
+        <section className={className ? `${styles.section} ${className}` : styles.section}>
             <h2>{title}</h2>
             {children}
         </section>
@@ -175,7 +177,9 @@ function CvPage() {
                         </dl>
                     </header>
 
-                    <p className={styles.summary}>{cv.summary}</p>
+                    <Section title={t.profile} className={styles.profile}>
+                        <p className={styles.summary}>{cv.summary}</p>
+                    </Section>
 
                     <div className={styles.columns}>
                         <div className={styles.mainColumn}>
