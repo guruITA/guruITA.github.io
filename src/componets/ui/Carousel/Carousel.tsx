@@ -46,6 +46,7 @@ function Carousel({ className, label, dotLabel, controls, autoplay = false, chil
     const [hovered, setHovered] = useState(false);
     const [focused, setFocused] = useState(false);
     const [onScreen, setOnScreen] = useState(false);
+    const [pageVisible, setPageVisible] = useState(() => !document.hidden);
     const [reducedMotion] = useState(
         () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     );
@@ -98,12 +99,17 @@ function Carousel({ className, label, dotLabel, controls, autoplay = false, chil
     // A new timer starts at every stop, also after a swipe or click, so the cards never move right
     // after someone moved them. It waits while the mouse or keyboard focus is on the row.
     useEffect(() => {
-        if (!autoplay || reducedMotion || hovered || focused || !onScreen || !scrollable) return;
-        const timer = window.setTimeout(() => {
-            if (!document.hidden) show(active + 1);
-        }, AUTOPLAY_DELAY);
+        const onChange = () => setPageVisible(!document.hidden);
+        document.addEventListener('visibilitychange', onChange);
+        return () => document.removeEventListener('visibilitychange', onChange);
+    }, []);
+
+    // A hidden tab pauses autoplay, and coming back starts a fresh timer.
+    useEffect(() => {
+        if (!autoplay || reducedMotion || hovered || focused || !onScreen || !scrollable || !pageVisible) return;
+        const timer = window.setTimeout(() => show(active + 1), AUTOPLAY_DELAY);
         return () => window.clearTimeout(timer);
-    }, [autoplay, reducedMotion, hovered, focused, onScreen, scrollable, active, show]);
+    }, [autoplay, reducedMotion, hovered, focused, onScreen, scrollable, pageVisible, active, show]);
 
     const showArrows = controls !== undefined && scrollable;
 
