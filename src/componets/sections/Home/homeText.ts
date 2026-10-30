@@ -1,5 +1,16 @@
 import type { Texts } from '../../../i18n/language';
 
+export interface Project {
+    number: string;
+    title: string;
+    description: string;
+    tags: string[];
+    // the name of the repository under github.com/guruITA
+    repo: string;
+    // only for work that is not finished yet
+    status?: string;
+}
+
 // All text of the portfolio page, in English and Dutch
 const en = {
     portraitAlt: 'Illustrated portrait of Gurpreet Singh',
@@ -32,29 +43,77 @@ const en = {
     projects: [
         {
             number: '01',
-            title: 'Connect Nine',
-            description: 'A youth-focused digital platform shaped around opportunities and community.',
-            tags: ['Product', 'Web'],
+            title: 'Connect',
+            description: 'A platform that links young people in Amstelland with organisations.',
+            tags: ['C#', 'TypeScript', 'Web'],
+            repo: 'connect-nine',
+            status: 'In progress with my team',
         },
         {
             number: '02',
-            title: 'Nidar Store',
-            description: 'A full-stack commerce project exploring useful product flows and delivery.',
-            tags: ['Full-stack', 'Commerce'],
+            title: 'City Sim',
+            description: 'A model smart city where ESP32 tiles send sensor data over WiFi to a live dashboard.',
+            tags: ['C++', 'ESP32', 'IoT'],
+            repo: 'smart-city-sim',
         },
         {
             number: '03',
-            title: 'Wireless AV',
-            description: 'A management concept for connected audiovisual environments.',
-            tags: ['Systems', 'UX'],
+            title: 'Movie Success Prediction',
+            description: 'Analyses 81,000 IMDb movies and predicts how well a new film will do.',
+            tags: ['Python', 'Dash', 'Machine learning'],
+            repo: 'movie-success-prediction',
         },
-    ],
+        {
+            number: '04',
+            title: 'PolitiXplore',
+            description: 'Results of the Dutch elections with parties, news, quizzes and a live chat.',
+            tags: ['Java', 'Spring Boot', 'Vue'],
+            repo: 'dutch-elections-platform',
+        },
+        {
+            number: '05',
+            title: 'Retro Game Store',
+            description: 'A web shop for the LucaStars games with accounts, a cart and a checkout.',
+            tags: ['TypeScript', 'Lit', 'Express'],
+            repo: 'lucastars-game-webshop',
+        },
+        {
+            number: '06',
+            title: 'City of Shadows',
+            description: 'A point-and-click detective game in the browser, set in a castle in 1932.',
+            tags: ['TypeScript', 'Lit', 'Express'],
+            repo: 'lucastars-escape-room-game',
+        },
+        {
+            number: '07',
+            title: 'Code Exchange',
+            description: 'A Q&A site for HBO-ICT students in the style of Stack Overflow.',
+            tags: ['TypeScript', 'Vite', 'MySQL'],
+            repo: 'code-exchange',
+        },
+        {
+            number: '08',
+            title: 'Hotel ter Duin',
+            description: 'A hotel website where guests book a room and staff manage the bookings.',
+            tags: ['PHP', 'Laravel', 'MySQL'],
+            repo: 'laravel-hotel_ter_duin_project',
+        },
+        {
+            number: '09',
+            title: 'Rode Kruis app',
+            description: 'An Android app with vehicle check forms for the Dutch Red Cross.',
+            tags: ['Kotlin', 'Android'],
+            repo: 'Rode_kruis-_APP',
+        },
+    ] as Project[],
     technologies: (project: string) => `${project} technologies`,
-    viewCaseStudy: 'View case study',
-    viewCaseStudyOf: (project: string) => `View case study: ${project}`,
+    viewOnGithub: 'View on GitHub',
+    viewOnGithubOf: (project: string) => `View ${project} on GitHub (opens in a new tab)`,
     projectsLabel: 'Projects',
     skillsLabel: 'Skills',
     showCard: (index: number, count: number) => `Show ${index + 1} of ${count}`,
+    projectsControls: { previous: 'Previous projects', next: 'Next projects' },
+    skillsControls: { previous: 'Previous skill', next: 'Next skill' },
     skillsHeading: {
         eyebrow: 'Capabilities',
         // the middle part never breaks, so "full-stack" does not split over two lines
@@ -106,29 +165,77 @@ const nl: typeof en = {
     projects: [
         {
             number: '01',
-            title: 'Connect Nine',
-            description: 'Een digitaal platform voor jongeren, rond kansen en community.',
-            tags: ['Product', 'Web'],
+            title: 'Connect',
+            description: 'Een platform dat jongeren in Amstelland met organisaties verbindt.',
+            tags: ['C#', 'TypeScript', 'Web'],
+            repo: 'connect-nine',
+            status: 'In ontwikkeling met mijn team',
         },
         {
             number: '02',
-            title: 'Nidar Store',
-            description: 'Een full-stack webshopproject over handige productflows en levering.',
-            tags: ['Full-stack', 'Webshop'],
+            title: 'City Sim',
+            description: 'Een modelstad waarin ESP32-tegels sensordata naar een live dashboard sturen.',
+            tags: ['C++', 'ESP32', 'IoT'],
+            repo: 'smart-city-sim',
         },
         {
             number: '03',
-            title: 'Wireless AV',
-            description: 'Een beheerconcept voor verbonden audiovisuele omgevingen.',
-            tags: ['Systemen', 'UX'],
+            title: 'Movie Success Prediction',
+            description: 'Analyseert 81.000 IMDb-films en voorspelt hoe goed een nieuwe film het doet.',
+            tags: ['Python', 'Dash', 'Machine learning'],
+            repo: 'movie-success-prediction',
+        },
+        {
+            number: '04',
+            title: 'PolitiXplore',
+            description: 'Verkiezingsuitslagen met partijen, nieuws, quizzen en een live chat.',
+            tags: ['Java', 'Spring Boot', 'Vue'],
+            repo: 'dutch-elections-platform',
+        },
+        {
+            number: '05',
+            title: 'Retro Game Store',
+            description: 'Een webshop voor LucaStars-games met accounts, winkelwagen en afrekenen.',
+            tags: ['TypeScript', 'Lit', 'Express'],
+            repo: 'lucastars-game-webshop',
+        },
+        {
+            number: '06',
+            title: 'City of Shadows',
+            description: 'Een point-and-click detectivegame in de browser, in een kasteel in 1932.',
+            tags: ['TypeScript', 'Lit', 'Express'],
+            repo: 'lucastars-escape-room-game',
+        },
+        {
+            number: '07',
+            title: 'Code Exchange',
+            description: 'Een Q&A-site voor HBO-ICT-studenten in de stijl van Stack Overflow.',
+            tags: ['TypeScript', 'Vite', 'MySQL'],
+            repo: 'code-exchange',
+        },
+        {
+            number: '08',
+            title: 'Hotel ter Duin',
+            description: 'Een hotelsite waar gasten kamers boeken en personeel de boekingen beheert.',
+            tags: ['PHP', 'Laravel', 'MySQL'],
+            repo: 'laravel-hotel_ter_duin_project',
+        },
+        {
+            number: '09',
+            title: 'Rode Kruis-app',
+            description: 'Een Android-app met controleformulieren voor voertuigen van het Rode Kruis.',
+            tags: ['Kotlin', 'Android'],
+            repo: 'Rode_kruis-_APP',
         },
     ],
     technologies: (project: string) => `Technieken van ${project}`,
-    viewCaseStudy: 'Bekijk casestudy',
-    viewCaseStudyOf: (project: string) => `Bekijk casestudy: ${project}`,
+    viewOnGithub: 'Bekijk op GitHub',
+    viewOnGithubOf: (project: string) => `Bekijk ${project} op GitHub (opent in een nieuw tabblad)`,
     projectsLabel: 'Projecten',
     skillsLabel: 'Vaardigheden',
     showCard: (index: number, count: number) => `Toon ${index + 1} van ${count}`,
+    projectsControls: { previous: 'Vorige projecten', next: 'Volgende projecten' },
+    skillsControls: { previous: 'Vorige vaardigheid', next: 'Volgende vaardigheid' },
     skillsHeading: {
         eyebrow: 'Vaardigheden',
         title: { before: 'Een veelzijdige ', noWrap: 'full-stack', after: ' toolkit' },
@@ -150,5 +257,4 @@ const nl: typeof en = {
 
 export const homeText: Texts<typeof en> = { en, nl };
 
-export type Project = (typeof en.projects)[number];
 export type Skill = (typeof en.skills)[number];

@@ -389,11 +389,33 @@
   }
 }
 
+.projects .sectionHeading {
+  margin-bottom: clamp(1.25rem, 4svh, 3.5rem);
+}
+
+// Three cards at a time in a row that scrolls sideways (ui/Carousel adds the arrows and dots).
+// The row clips what sticks out, so it has room above and below for the hover lift and the shadow.
 .projectGrid {
-  margin-top: clamp(1.5rem, 5svh, 4rem);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.75rem;
+  --gap: 1.75rem;
+  position: relative;
+  display: flex;
+  gap: var(--gap);
+  margin-block: -0.85rem -1.25rem;
+  padding-block: 0.85rem 1.25rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    flex: 0 0 calc((100% - 2 * var(--gap)) / 3);
+    scroll-snap-align: start;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+  }
 }
 
 .projectCard {
@@ -474,7 +496,7 @@
   align-items: center;
   gap: 1rem;
 
-  span {
+  > span {
     color: var(--color-blue);
     opacity: 0.65;
     font-size: clamp(2.25rem, 5.5svh, 3.25rem);
@@ -486,6 +508,32 @@
     height: 1px;
     flex: 1;
     background: linear-gradient(90deg, rgba(83, 155, 239, 0.65), transparent);
+  }
+}
+
+// work that is still going on: a green pill with a pulsing dot at the end of the top line, where it
+// adds no height to the card
+.projectStatus {
+  margin: 0;
+  padding: 0.3rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  color: #a7f3d0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  span {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #34d399;
+    animation: pulse 1.8s ease-in-out infinite;
   }
 }
 
@@ -616,6 +664,7 @@
   // three cards under each other never fit one screen: swipe them instead
   .projectGrid {
     @include carousel.track(min(82vw, 22rem), var(--gutter));
+    margin-block: -0.5rem;
   }
 
   .skillGrid {
@@ -770,7 +819,10 @@
     }
   }
 
-  .projectGrid,
+  .projects .sectionHeading {
+    margin-bottom: clamp(0.75rem, 3svh, 3rem);
+  }
+
   .skillGrid {
     margin-top: clamp(0.75rem, 3svh, 3rem);
   }
@@ -810,6 +862,16 @@
       height: 1px;
       flex: 1;
       background: linear-gradient(90deg, transparent, rgba(83, 155, 239, 0.65));
+    }
+
+    // with a status there is no room for the lines: number and status sit together in the middle
+    &:has(.projectStatus) {
+      justify-content: center;
+
+      &::before,
+      i {
+        display: none;
+      }
     }
   }
 
@@ -882,6 +944,7 @@
   .profileVisual::before,
   .profileVisual::after,
   .availability span,
+  .projectStatus span,
   .caretDone {
     animation: none;
   }

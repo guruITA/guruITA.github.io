@@ -82,7 +82,7 @@ function onMouse(handler: () => void) {
     };
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectCard({ project }: { project: Project }) {
     const [active, setActive] = useState(false);
     const t = useTexts(homeText);
 
@@ -97,6 +97,12 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             <div className={styles.projectTopline}>
                 <span>{project.number}</span>
                 <i aria-hidden="true" />
+                {project.status && (
+                    <p className={styles.projectStatus}>
+                        <span aria-hidden="true" />
+                        {project.status}
+                    </p>
+                )}
             </div>
             <h3>{project.title}</h3>
             <p>{project.description}</p>
@@ -106,10 +112,15 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                 ))}
             </ul>
             <SceneSlot className={styles.projectScene}>
-                {(inView) => <ProjectPreviewScene inView={inView} variant={index} active={active} />}
+                {(inView) => <ProjectPreviewScene inView={inView} project={project.repo} active={active} />}
             </SceneSlot>
-            <a href="#contact" aria-label={t.viewCaseStudyOf(project.title)}>
-                {t.viewCaseStudy} <span aria-hidden="true">→</span>
+            <a
+                href={`https://github.com/guruITA/${project.repo}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t.viewOnGithubOf(project.title)}
+            >
+                {t.viewOnGithub} <span aria-hidden="true">↗</span>
             </a>
         </article>
     );
@@ -287,9 +298,15 @@ function Home() {
                         description={t.projectsHeading.description}
                     />
 
-                    <Carousel className={styles.projectGrid} label={t.projectsLabel} dotLabel={t.showCard}>
-                        {t.projects.map((project, index) => (
-                            <ProjectCard project={project} index={index} key={project.title} />
+                    <Carousel
+                        className={styles.projectGrid}
+                        label={t.projectsLabel}
+                        dotLabel={t.showCard}
+                        controls={t.projectsControls}
+                        autoplay
+                    >
+                        {t.projects.map((project) => (
+                            <ProjectCard project={project} key={project.repo} />
                         ))}
                     </Carousel>
                 </div>
@@ -313,7 +330,13 @@ function Home() {
                         description={t.skillsHeading.description}
                     />
 
-                    <Carousel className={styles.skillGrid} label={t.skillsLabel} dotLabel={t.showCard}>
+                    <Carousel
+                        className={styles.skillGrid}
+                        label={t.skillsLabel}
+                        dotLabel={t.showCard}
+                        controls={t.skillsControls}
+                        autoplay
+                    >
                         {t.skills.map((skill, index) => (
                             <SkillCard skill={skill} index={index} key={skill.index} />
                         ))}

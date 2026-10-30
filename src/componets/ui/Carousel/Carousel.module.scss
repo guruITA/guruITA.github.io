@@ -1,3 +1,140 @@
+// Without arrows the frame is a plain block: the row and the dots under each other
+.frame {
+  position: relative;
+}
+
+// Arrows on both sides of the row. The arrows lie over the edges of the row instead of
+// taking room next to it, so the cards keep the width (and the section its height) they have without them.
+.withArrows {
+  // how far an arrow sticks out past the row: into the free space next to the page where there is room
+  // for all of it, otherwise half, over the edge of the outer card
+  --arrow-out: clamp(1.5rem, (100vw - 1200px) / 2, 4rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'track'
+    'dots';
+
+  > [role='group'] {
+    grid-area: track;
+  }
+
+  // on wide screens the arrows are enough, and without dots the section keeps fitting the screen
+  .dots {
+    grid-area: dots;
+    display: none;
+  }
+
+  .previous,
+  .next {
+    grid-area: track;
+    align-self: center;
+    z-index: 1;
+  }
+
+  .previous {
+    justify-self: start;
+    margin-left: calc(-1 * var(--arrow-out));
+  }
+
+  .next {
+    justify-self: end;
+    margin-right: calc(-1 * var(--arrow-out));
+  }
+
+  // the row runs edge to edge on small screens (the same width where Home makes it swipe): the arrows go
+  // next to the dots under it
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr auto auto auto 1fr;
+    grid-template-areas:
+      'track track track track track'
+      '. previous dots next .';
+    column-gap: 0.25rem;
+
+    .dots {
+      display: flex;
+    }
+
+    .previous {
+      grid-area: previous;
+      margin-left: 0;
+    }
+
+    .next {
+      grid-area: next;
+      margin-right: 0;
+    }
+
+    // narrower, so nine dots and both arrows fit next to each other on a phone
+    .dots button {
+      width: 1.75rem;
+      height: 2.25rem;
+    }
+  }
+}
+
+.arrow {
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-glass-border);
+  border-radius: 999px;
+  background: rgba(4, 12, 27, 0.62);
+  color: var(--color-blue-bright);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    border-color: var(--color-cyan);
+    background: rgba(12, 28, 55, 0.8);
+  }
+
+  // a small nudge in the direction the cards go
+  &.previous:hover {
+    transform: translateX(-2px);
+  }
+
+  &.next:hover {
+    transform: translateX(2px);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 960px) {
+    width: 2.25rem;
+    height: 2.25rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
 // 36px tap area around each dot; the active dot stretches into a short bar
 .dots {
   display: flex;
@@ -38,6 +175,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .arrow,
   .dots button::before {
     transition: none;
   }

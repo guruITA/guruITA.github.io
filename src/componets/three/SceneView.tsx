@@ -38,11 +38,43 @@ function useSectionShown(element: RefObject<HTMLElement | null>) {
     return shown;
 }
 
+// The shared canvas is not clipped by a carousel row (ui/Carousel) the way the cards in it are, so a scene
+// would draw past the edge of the row. A scene that is partly scrolled out of its row hides until it is
+// fully back in. A row that runs edge to edge (phones) is clipped by the screen like the canvas, so there
+// a scene stays.
+function useInsideRow(element: RefObject<HTMLElement | null>) {
+    const [inside, setInside] = useState(true);
+
+    useEffect(() => {
+        const target = element.current;
+        const row = target?.closest<HTMLElement>('[data-carousel-row]');
+        if (!target || !row) {
+            return;
+        }
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[entries.length - 1];
+                const bounds = entry.rootBounds;
+                const edgeToEdge =
+                    bounds !== null && bounds.left <= 0 && bounds.right >= document.documentElement.clientWidth;
+                setInside(edgeToEdge || entry.intersectionRatio >= 0.99);
+            },
+            { root: row, threshold: [0, 0.99] },
+        );
+        observer.observe(target);
+        return () => observer.disconnect();
+    }, [element]);
+
+    return inside;
+}
+
 // A section scene drawn by the shared SceneLayer canvas inside this slot, instead of in a canvas of its own.
 // Only for scenes that sit on top of their card; the hero orb sits behind the photo and keeps SceneCanvas.
 function SceneView({ inView, camera, children }: SceneViewProps) {
     const ref = useRef<HTMLElement>(null);
-    const shown = useSectionShown(ref);
+    const sectionShown = useSectionShown(ref);
+    const insideRow = useInsideRow(ref);
+    const shown = sectionShown && insideRow;
 
     useEffect(() => requestSceneLayer(), []);
 
