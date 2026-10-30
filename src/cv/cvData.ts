@@ -58,29 +58,29 @@ const en: CvData = {
         {
             title: 'Software Engineering (Bachelor, HBO)',
             place: 'Amsterdam University of Applied Sciences (HvA), Amsterdam',
-            period: 'Sep 2023 – present',
+            period: 'Sep 2023 - present',
         },
         {
             title: 'Software Developer (MBO level 4)',
             place: 'MBO College Zuidoost, Amsterdam',
-            period: 'Aug 2020 – Jun 2023',
+            period: 'Aug 2020 - Jun 2023',
         },
         {
             title: 'Automotive Technician (MBO level 2)',
             place: 'MBO College Westpoort, Amsterdam',
-            period: 'Sep 2018 – Sep 2020',
+            period: 'Sep 2018 - Sep 2020',
         },
         {
             title: 'Mobility and Transport',
             place: 'Montessori College Oost, Amsterdam',
-            period: 'Aug 2014 – Jun 2018',
+            period: 'Aug 2014 - Jun 2018',
         },
     ],
     internships: [
         {
             title: 'Software Developer Intern',
             place: 'Domits (Financieelsysteem B.V.), Haarlem',
-            period: 'Sep 2025 – Jan 2026',
+            period: 'Sep 2025 - Jan 2026',
             points: [
                 'Built the host finance part of Domits, a holiday rental booking platform, with Stripe Connect: bank details, charges, the 110% payment split, scheduled payouts, a revenue overview and a finance FAQ.',
                 'Wrote the back end for it on AWS Lambda and moved the host dashboard styling to SCSS.',
@@ -90,7 +90,7 @@ const en: CvData = {
         {
             title: 'Software Developer Intern',
             place: 'ITalent-workspace, Amsterdam',
-            period: 'Sep 2022 – Feb 2023',
+            period: 'Sep 2022 - Feb 2023',
             points: [
                 'Built an Android app in Kotlin for the Red Cross vehicle logistics, with one teammate. I wrote almost all of it.',
                 'Volunteers fill in a check form when they take or return a vehicle: accessories, licence plate, events and photos of damage, so every vehicle can be traced back to who used it.',
@@ -99,7 +99,7 @@ const en: CvData = {
         {
             title: 'Automotive Mechanic Intern',
             place: 'Carworx, Amsterdam',
-            period: 'Aug 2019 – Jul 2020',
+            period: 'Aug 2019 - Jul 2020',
             points: ['Diagnosed faults and did maintenance and repairs on cars.'],
         },
     ],
@@ -107,19 +107,19 @@ const en: CvData = {
         {
             title: 'Taxi Driver (self-employed)',
             place: 'Lucky Sardar Services, Volendam',
-            period: 'Apr 2023 – present',
+            period: 'Apr 2023 - present',
             points: ['Run my own taxi business: the rides, the planning, the customer contact and the bookkeeping.'],
         },
         {
             title: 'Delivery Driver',
             place: 'Indian Spices & Vibes, Amsterdam',
-            period: 'Apr 2020 – Apr 2021',
+            period: 'Apr 2020 - Apr 2021',
             points: ['Took orders, packed meals, worked the till and delivered.'],
         },
         {
             title: 'Delivery Driver and Staff Member',
             place: 'Grillwok, Diemen',
-            period: 'May 2016 – Jul 2019',
+            period: 'May 2016 - Jul 2019',
             points: ['Helped run the family business after school: cooking, phone orders, the till and deliveries.'],
         },
     ],
@@ -161,29 +161,29 @@ const nl: CvData = {
         {
             title: 'Software Engineering (bachelor, hbo)',
             place: 'Hogeschool van Amsterdam (HvA), Amsterdam',
-            period: 'sep 2023 – heden',
+            period: 'sep 2023 - heden',
         },
         {
             title: 'Software Developer (mbo niveau 4)',
             place: 'MBO College Zuidoost, Amsterdam',
-            period: 'aug 2020 – jun 2023',
+            period: 'aug 2020 - jun 2023',
         },
         {
             title: 'Autotechnicus (mbo niveau 2)',
             place: 'MBO College Westpoort, Amsterdam',
-            period: 'sep 2018 – sep 2020',
+            period: 'sep 2018 - sep 2020',
         },
         {
             title: 'Mobiliteit en Transport',
             place: 'Montessori College Oost, Amsterdam',
-            period: 'aug 2014 – jun 2018',
+            period: 'aug 2014 - jun 2018',
         },
     ],
     internships: [
         {
             title: 'Stagiair Software Developer',
             place: 'Domits (Financieelsysteem B.V.), Haarlem',
-            period: 'sep 2025 – jan 2026',
+            period: 'sep 2025 - jan 2026',
             points: [
                 'Bouwde het financiële deel voor verhuurders van Domits, een boekingsplatform voor vakantiewoningen, met Stripe Connect: bankgegevens, betalingen, de 110%-verdeling, ingeplande uitbetalingen, een omzetoverzicht en een financiële FAQ.',
                 'Schreef de backend daarvoor op AWS Lambda en zette de styling van het verhuurdersdashboard om naar SCSS.',
@@ -193,7 +193,7 @@ const nl: CvData = {
         {
             title: 'Stagiair Software Developer',
             place: 'ITalent-workspace, Amsterdam',
-            period: 'sep 2022 – feb 2023',
+            period: 'sep 2022 - feb 2023',
             points: [
                 'Bouwde met één teamgenoot een Android-app in Kotlin voor de voertuiglogistiek van het Rode Kruis. Ik schreef bijna de hele app.',
                 'Vrijwilligers vullen een controleformulier in als ze een voertuig meenemen of terugbrengen: accessoires, kenteken, gebeurtenissen en foto’s van schade, zodat elk voertuig te herleiden is naar wie het gebruikte.',
@@ -202,7 +202,7 @@ const nl: CvData = {
         {
             title: 'Stagiair Automonteur',
             place: 'Carworx, Amsterdam',
-            period: 'aug 2019 – jul 2020',
+            period: 'aug 2019 - jul 2020',
             points: ['Stelde storingen vast en deed onderhoud en reparaties aan auto’s.'],
         },
     ],
@@ -210,19 +210,19 @@ const nl: CvData = {
         {
             title: 'Taxichauffeur (zzp)',
             place: 'Lucky Sardar Services, Volendam',
-            period: 'apr 2023 – heden',
+            period: 'apr 2023 - heden',
             points: ['Mijn eigen taxibedrijf: de ritten, de planning, het klantcontact en de boekhouding.'],
         },
         {
             title: 'Bezorger',
             place: 'Indian Spices & Vibes, Amsterdam',
-            period: 'apr 2020 – apr 2021',
+            period: 'apr 2020 - apr 2021',
             points: ['Bestellingen aannemen, maaltijden inpakken, afrekenen aan de kassa en bezorgen.'],
         },
         {
             title: 'Bezorger en medewerker',
             place: 'Grillwok, Diemen',
-            period: 'mei 2016 – jul 2019',
+            period: 'mei 2016 - jul 2019',
             points: ['Hielp na school mee in het familiebedrijf: koken, telefonische bestellingen, de kassa en bezorgen.'],
         },
     ],

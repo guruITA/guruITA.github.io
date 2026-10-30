@@ -45,7 +45,7 @@ const text = {
         messagePlaceholder: 'Tell me about your idea or question…',
         send: 'Send message',
         sending: 'Sending…',
-        success: "Thanks — your message is on its way. I'll reply soon.",
+        success: "Thanks, your message is on its way. I'll reply soon.",
         invalid: 'Please check your name and email, and write at least a short sentence about your idea or question.',
         verifying: "One moment, checking that you're not a bot. Please press Send again in a second.",
         tooFast: 'That was quick. Please check your message and press Send again.',
@@ -252,7 +252,7 @@ function ContactForm() {
 
         if (!FORM_ENDPOINT || !TURNSTILE_SITE_KEY) {
             console.warn(
-                'VITE_CONTACT_FORM_ENDPOINT or VITE_TURNSTILE_SITE_KEY is not configured — see .env.example.',
+                'VITE_CONTACT_FORM_ENDPOINT or VITE_TURNSTILE_SITE_KEY is not configured. See .env.example.',
             );
             setStatus('error');
             return;
