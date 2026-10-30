@@ -15,30 +15,30 @@ export interface Project {
 const en = {
     portraitAlt: 'Illustrated portrait of Gurpreet Singh',
     role: 'Full-stack developer',
-    location: 'Based in the Netherlands',
-    availability: 'Open to opportunities',
+    location: 'Volendam, the Netherlands',
+    availability: 'Looking for a graduation internship',
     greeting: "Hi, I'm Gurpreet.",
-    tagline: 'I build thoughtful digital products from interface to infrastructure.',
-    intro: 'Software Engineering student and full-stack developer focused on clear experiences, maintainable systems and continuous learning.',
+    tagline: 'I build the parts that have to keep working: logins, payments and deploys.',
+    intro: 'Fourth-year Software Engineering student at the HvA. For me a feature is done when it is tested, written down and running on a server.',
     viewProjects: 'View projects',
     contactMe: 'Contact me',
     about: {
         eyebrow: 'About me',
-        title: 'Engineering with curiosity and care',
+        title: 'From car engines to code',
         description:
-            'I enjoy turning complex requirements into understandable, reliable experiences — while continuously improving how I design, build and collaborate.',
-        panelTitle: 'What I bring',
+            'I started as an automotive technician and switched to software in 2020. Next to my studies I run my own taxi business. Both taught me that people count on things working.',
+        panelTitle: 'How I work',
         principles: [
-            'Clear thinking before writing code',
-            'End-to-end ownership and pragmatic delivery',
-            'A collaborative, feedback-driven approach',
+            'One issue, one branch, one merge request, reviewed by a teammate',
+            'I write down how things work, so a new teammate can start without asking',
+            'Done means tested, also in the browser and on the test site',
         ],
         viewCv: 'View CV',
     },
     projectsHeading: {
-        eyebrow: 'Selected work',
-        title: 'Projects that connect code with real needs',
-        description: 'Product, platform and systems work ready to grow into deeper case studies.',
+        eyebrow: 'Projects',
+        title: 'What I built, mostly in a team',
+        description: 'Every repository says what the project does, how to run it and who did what.',
     },
     projects: [
         {
@@ -115,52 +115,52 @@ const en = {
     projectsControls: { previous: 'Previous projects', next: 'Next projects' },
     skillsControls: { previous: 'Previous skill', next: 'Next skill' },
     skillsHeading: {
-        eyebrow: 'Capabilities',
-        // the middle part never breaks, so "full-stack" does not split over two lines
-        title: { before: 'A balanced ', noWrap: 'full-stack', after: ' toolkit' },
+        eyebrow: 'Skills',
+        // the middle part never breaks, so it does not split over two lines
+        title: { before: 'What I ', noWrap: 'work with', after: '' },
         description:
-            'Tools change. Strong fundamentals, thoughtful architecture and the ability to learn remain central.',
+            'Most of my work is back end. I also build the screens on top of it and the pipeline that ships it.',
     },
     skills: [
-        { index: 'A', title: 'Frontend', description: 'React, TypeScript, responsive UI and interaction.' },
-        { index: 'B', title: 'Backend', description: 'APIs, application logic, data and integrations.' },
-        { index: 'C', title: 'Engineering', description: 'Git, testing, delivery and maintainable code.' },
-        { index: 'D', title: '3D & exploration', description: 'Three.js, experiments and emerging technology.' },
+        { index: 'A', title: 'Frontend', description: 'Vue, Lit and React with TypeScript, styled with SCSS.' },
+        { index: 'B', title: 'Backend', description: 'Spring Boot, Laravel, Express and AWS Lambda, on MySQL.' },
+        { index: 'C', title: 'Engineering', description: 'Reviews, unit and browser tests, and deploys in CI.' },
+        { index: 'D', title: 'Hardware & 3D', description: 'ESP32 boards with sensors in C++, and Three.js.' },
     ],
     contact: {
-        eyebrow: "Let's build something useful",
-        title: 'Have a project, opportunity or idea?',
-        description: "I'm always open to a good conversation about software, collaboration and learning.",
+        eyebrow: 'Contact',
+        title: 'Have an internship or a project for me?',
+        description: 'Send me a message. A question about one of my projects is welcome too.',
     },
 };
 
 const nl: typeof en = {
     portraitAlt: 'Getekend portret van Gurpreet Singh',
     role: 'Full-stack developer',
-    location: 'Gevestigd in Nederland',
-    availability: 'Open voor nieuwe kansen',
+    location: 'Volendam, Nederland',
+    availability: 'Op zoek naar een afstudeerstage',
     greeting: 'Hoi, ik ben Gurpreet.',
-    tagline: 'Ik bouw doordachte digitale producten, van interface tot infrastructuur.',
-    intro: 'Software Engineering-student en full-stack developer, gericht op heldere ervaringen, onderhoudbare systemen en blijven leren.',
+    tagline: 'Ik bouw de delen die moeten blijven werken: inloggen, betalen en deployen.',
+    intro: 'Vierdejaars student Software Engineering aan de HvA. Voor mij is een feature af als hij getest is, beschreven is en op een server draait.',
     viewProjects: 'Bekijk projecten',
     contactMe: 'Neem contact op',
     about: {
         eyebrow: 'Over mij',
-        title: 'Software bouwen met nieuwsgierigheid en zorg',
+        title: 'Van automotoren naar code',
         description:
-            'Ik maak van ingewikkelde eisen begrijpelijke, betrouwbare toepassingen — en blijf verbeteren hoe ik ontwerp, bouw en samenwerk.',
-        panelTitle: 'Wat ik meebreng',
+            'Ik was eerst autotechnicus en koos in 2020 voor software. Naast mijn studie heb ik een eigen taxibedrijf. Allebei leerden me dat mensen rekenen op iets dat werkt.',
+        panelTitle: 'Hoe ik werk',
         principles: [
-            'Eerst helder nadenken, dan pas code schrijven',
-            'Verantwoordelijkheid van begin tot eind en praktisch opleveren',
-            'Samenwerken, met feedback als vast onderdeel',
+            'Eén issue, één branch, één merge request, met een review',
+            'Ik schrijf op hoe iets werkt, zodat een nieuwe teamgenoot zo kan beginnen',
+            'Af is getest, ook in de browser en op de testsite',
         ],
         viewCv: 'Bekijk CV',
     },
     projectsHeading: {
-        eyebrow: 'Uitgelicht werk',
-        title: 'Projecten waarin code echte problemen oplost',
-        description: 'Werk aan producten, platforms en systemen, dat kan uitgroeien tot uitgebreidere casestudy’s.',
+        eyebrow: 'Projecten',
+        title: 'Wat ik bouwde, meestal in een team',
+        description: 'Elke repository vertelt wat het project doet, hoe je het draait en wie wat deed.',
     },
     projects: [
         {
@@ -238,20 +238,20 @@ const nl: typeof en = {
     skillsControls: { previous: 'Vorige vaardigheid', next: 'Volgende vaardigheid' },
     skillsHeading: {
         eyebrow: 'Vaardigheden',
-        title: { before: 'Een veelzijdige ', noWrap: 'full-stack', after: ' toolkit' },
+        title: { before: 'Waar ik ', noWrap: 'mee werk', after: '' },
         description:
-            'Tools veranderen. Sterke basiskennis, doordachte architectuur en het vermogen om te blijven leren staan centraal.',
+            'Het meeste werk zit in de backend. Ik bouw ook de schermen erop en de pipeline die het uitrolt.',
     },
     skills: [
-        { index: 'A', title: 'Frontend', description: 'React, TypeScript, responsive UI en interactie.' },
-        { index: 'B', title: 'Backend', description: 'API’s, applicatielogica, data en koppelingen.' },
-        { index: 'C', title: 'Engineering', description: 'Git, testen, oplevering en onderhoudbare code.' },
-        { index: 'D', title: '3D & experimenten', description: 'Three.js, experimenten en nieuwe technologie.' },
+        { index: 'A', title: 'Frontend', description: 'Vue, Lit en React met TypeScript, gestyled met SCSS.' },
+        { index: 'B', title: 'Backend', description: 'Spring Boot, Laravel, Express en AWS Lambda, op MySQL.' },
+        { index: 'C', title: 'Engineering', description: 'Reviews, unit- en browsertests, en deploys in CI.' },
+        { index: 'D', title: 'Hardware & 3D', description: 'ESP32-bordjes met sensoren in C++, en Three.js.' },
     ],
     contact: {
-        eyebrow: 'Laten we iets nuttigs bouwen',
-        title: 'Heb je een project, kans of idee?',
-        description: 'Ik sta altijd open voor een goed gesprek over software, samenwerken en leren.',
+        eyebrow: 'Contact',
+        title: 'Heb je een stage of project voor mij?',
+        description: 'Stuur me een bericht. Een vraag over een van mijn projecten mag ook.',
     },
 };
 
