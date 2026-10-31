@@ -15,7 +15,7 @@ const PDF = {
 
 const text = {
     en: {
-        download: { idle: 'Download PDF', busy: 'Preparing PDF…', done: 'Downloaded ✓' },
+        download: { idle: 'Download CV (PDF)', busy: 'Preparing PDF…', done: 'Downloaded' },
         photoAlt: (name: string) => `Photo of ${name}`,
         profile: 'About me',
         education: 'Education',
@@ -27,7 +27,7 @@ const text = {
         interests: 'Interests',
     },
     nl: {
-        download: { idle: 'Download PDF', busy: 'PDF wordt klaargemaakt…', done: 'Gedownload ✓' },
+        download: { idle: 'Download CV (PDF)', busy: 'PDF wordt klaargemaakt…', done: 'Gedownload' },
         photoAlt: (name: string) => `Foto van ${name}`,
         profile: 'Over mij',
         education: 'Opleiding',
@@ -94,6 +94,17 @@ function DownloadButton() {
             aria-busy={state === 'busy'}
             aria-disabled={state !== 'idle'}
         >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                {state === 'done' ? (
+                    <path d="M20 6 9 17l-5-5" />
+                ) : (
+                    <>
+                        <path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
+                        {/* the arrow moves on its own while the PDF is on its way */}
+                        <path className={styles.downloadArrow} d="M12 3v12m-5-5 5 5 5-5" />
+                    </>
+                )}
+            </svg>
             {label}
         </a>
     );
@@ -149,13 +160,13 @@ function CvPage() {
         <>
             <Navbar />
             <div className={styles.page}>
-                {/* screen only: the PDF is just the sheet. The download sits at the top on purpose:
-                    not every visitor reads down to the end of the CV */}
-                <div className={styles.toolbar}>
-                    <DownloadButton />
-                </div>
-
                 <main className={styles.sheet}>
+                    {/* screen only: the PDF hides it. The download sits in the top corner on purpose:
+                        not every visitor reads down to the end of the CV */}
+                    <div className={styles.toolbar}>
+                        <DownloadButton />
+                    </div>
+
                     <header className={styles.header}>
                         <div className={styles.identity}>
                             <img className={styles.photo} src={photo} alt={t.photoAlt(cv.name)} width="320" height="320" />
