@@ -37,7 +37,7 @@ const en: CvData = {
     role: 'Software Engineering student · Back-end developer',
     location: 'Volendam, the Netherlands',
     summary:
-        'Driven fourth-year Software Engineering student at the Amsterdam University of Applied Sciences (HvA), with a strong focus on back-end development and a passion for innovative solutions. I am looking for a graduation internship where I can add value, keep growing and possibly stay on to work after I graduate. I have hands-on experience building apps with real impact, such as a damage detection app for the Red Cross and the host payment system of the Domits booking platform. I have worked in teams during my internships and in school projects. At school we built projects for real clients, such as Goodoo and the Young Amstelland Awards, and a wireless audiovisual management system. That taught me to listen closely to what a client wants and, where needed, to advise with clear reasons on what could work better. I am an analytical problem solver who strives for efficiency and quality, and I enjoy learning and applying new technologies.',
+        'Driven fourth-year Software Engineering student at the Amsterdam University of Applied Sciences (HvA), with a strong focus on back-end development and a passion for innovative solutions. I am looking for a graduation internship where I can add value, keep growing and possibly stay on to work after I graduate. I have hands-on experience building apps with real impact, such as a damage detection app for the Red Cross and the host payment system of the Domits booking platform. I have worked in teams during my internships and in school projects. At school we built projects for real clients, such as Goodoo, the Young Amstelland Awards and a wireless audiovisual management system. That taught me to listen closely to what a client wants and, where needed, to advise with clear reasons on what could work better. I am an analytical problem solver who strives for efficiency and quality, and I enjoy learning and applying new technologies.',
     links: [
         { label: 'Email', value: 'hello@guruita.dev', href: 'mailto:hello@guruita.dev' },
         { label: 'Phone', value: '+31 6 86215941', href: 'tel:+31686215941' },
@@ -129,7 +129,7 @@ const en: CvData = {
         { group: 'Cloud & data', items: ['AWS Lambda', 'Stripe', 'MySQL', 'Docker'] },
         { group: 'Front end', items: ['React', 'Vue', 'Lit', 'SCSS', 'Three.js'] },
         { group: 'Mobile & hardware', items: ['Kotlin', 'Android', 'C', 'C++', 'ESP32', 'Raspberry Pi'] },
-        { group: 'Personal', items: ['Hands-on', 'Patient', 'Helpful', 'Eager to learn', 'Scrum'] },
+        { group: 'Personal', items: ['Hands-on', 'Patient', 'Helpful', 'Eager to learn', 'Agile worker'] },
     ],
     languages: ['Dutch', 'English', 'Italian', 'Punjabi'],
     interests: ['Building AI agent harnesses', 'Basketball', 'Table tennis', 'Coding', 'Gaming', 'Going out with friends'],
@@ -140,7 +140,7 @@ const nl: CvData = {
     role: 'Software Engineering-student · Back-end developer',
     location: 'Volendam, Nederland',
     summary:
-        'Gedreven vierdejaars student Software Engineering aan de Hogeschool van Amsterdam (HvA), met een sterke focus op back-end ontwikkeling en een passie voor innovatieve oplossingen. Ik zoek een afstudeerstage waar ik waarde toevoeg, verder groei en na mijn afstuderen mogelijk kan blijven werken. Ik heb praktische ervaring in het bouwen van apps die echte impact maken, zoals een schadedetectie-app voor het Rode Kruis en het betaalsysteem voor verhuurders van Domits. Ik heb in teams gewerkt tijdens mijn stages en in schoolprojecten. Op school bouwden we projecten voor echte klanten, zoals Goodoo en de Young Amstelland Awards, en een draadloos audiovisueel beheersysteem. Daardoor leerde ik goed te luisteren naar de wensen van een klant en waar nodig met onderbouwing te adviseren wat beter kan. Ik ben een analytische probleemoplosser die streeft naar efficiëntie en kwaliteit, en ik leer graag nieuwe technologieën en pas ze toe.',
+        'Gedreven vierdejaars student Software Engineering aan de Hogeschool van Amsterdam (HvA), met een sterke focus op back-end ontwikkeling en een passie voor innovatieve oplossingen. Ik zoek een afstudeerstage waar ik waarde toevoeg, verder groei en na mijn afstuderen mogelijk kan blijven werken. Ik heb praktische ervaring in het bouwen van apps die echte impact maken, zoals een schadedetectie-app voor het Rode Kruis en het betaalsysteem voor verhuurders van Domits. Ik heb in teams gewerkt tijdens mijn stages en in schoolprojecten. Op school bouwden we projecten voor echte klanten, zoals Goodoo, de Young Amstelland Awards en een draadloos audiovisueel beheersysteem. Daardoor leerde ik goed te luisteren naar de wensen van een klant en waar nodig met onderbouwing te adviseren wat beter kan. Ik ben een analytische probleemoplosser die streeft naar efficiëntie en kwaliteit, en ik leer graag nieuwe technologieën en pas ze toe.',
     links: [
         { label: 'E-mail', value: 'hello@guruita.dev', href: 'mailto:hello@guruita.dev' },
         { label: 'Telefoon', value: '+31 6 86215941', href: 'tel:+31686215941' },
@@ -232,7 +232,7 @@ const nl: CvData = {
         { group: 'Cloud & data', items: ['AWS Lambda', 'Stripe', 'MySQL', 'Docker'] },
         { group: 'Frontend', items: ['React', 'Vue', 'Lit', 'SCSS', 'Three.js'] },
         { group: 'Mobiel & hardware', items: ['Kotlin', 'Android', 'C', 'C++', 'ESP32', 'Raspberry Pi'] },
-        { group: 'Persoonlijk', items: ['Praktisch', 'Geduldig', 'Hulpvaardig', 'Leergierig', 'Scrum'] },
+        { group: 'Persoonlijk', items: ['Praktisch', 'Geduldig', 'Hulpvaardig', 'Leergierig', 'Agile werker'] },
     ],
     languages: ['Nederlands', 'Engels', 'Italiaans', 'Punjabi'],
     interests: ['AI-agent harnesses bouwen', 'Basketbal', 'Tafeltennis', 'Programmeren', 'Gamen', 'Uitgaan met vrienden'],
