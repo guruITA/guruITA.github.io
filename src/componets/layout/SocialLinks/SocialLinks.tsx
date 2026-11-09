@@ -16,7 +16,7 @@ function SocialLinks({ className = '' }: { className?: string }) {
             <li>
                 <a
                     className={styles.instagram}
-                    href="https://instagram.com/guruITA"
+                    href="https://www.instagram.com/gur_ita/"
                     target="_blank"
                     rel="noreferrer"
                     aria-label="Instagram"
